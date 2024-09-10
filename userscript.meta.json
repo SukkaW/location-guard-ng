@@ -1,0 +1,7 @@
+{
+  "name": "Location Guard",
+  "namespace": "https://skk.moe",
+  "grant": ["none"],
+  "run-at": "document-start",
+  "include": []
+}

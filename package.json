@@ -1,0 +1,43 @@
+{
+  "name": "location-guard-userscript",
+  "version": "0.0.0",
+  "description": "Hide your geographic location from websites.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SukkaW/location-guard-userscript.git"
+  },
+  "main": "dist/location-guard.user.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup --configPlugin rollup-plugin-swc3 -c --bundleConfigAsCjs",
+    "lint": "eslint --format=sukka .",
+    "prepublishOnly": "npm run build",
+    "release": "bumpp -r --all --commit \"release: %s\" --tag \"%s\""
+  },
+  "keywords": [
+    "userscript",
+    "userjs",
+    "tampermonkey",
+    "violentmonkey",
+    "location",
+    "location-guard"
+  ],
+  "author": "Sukka <https://skk.moe>",
+  "license": "MIT",
+  "devDependencies": {
+    "@swc/core": "^1.7.24",
+    "@types/greasemonkey": "^4.0.7",
+    "bumpp": "^9.5.2",
+    "eslint": "^9.10.0",
+    "eslint-config-sukka": "^6.4.2",
+    "eslint-formatter-sukka": "^6.4.2",
+    "rollup": "^4.21.2",
+    "rollup-plugin-swc3": "^0.11.2",
+    "rollup-plugin-userscript-metablock": "^0.4.2",
+    "typed-query-selector": "^2.12.0",
+    "typescript": "^5.6.2"
+  },
+  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
+}
