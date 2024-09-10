@@ -11,18 +11,18 @@ const getCurrentPosition = navigator.geolocation.getCurrentPosition;
 // eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const clearWatch = navigator.geolocation.clearWatch;
 
-export const spoofLocation = (): void => {
-  async function callCb(cb: PositionCallback, pos: MutableGeolocationPosition, checkAllowed: boolean): Promise<void>;
-  async function callCb(cb: PositionErrorCallback | null | undefined, error: GeolocationPositionError, checkAllowed: boolean): Promise<void>;
-  async function callCb(cb: PositionCallback | PositionErrorCallback | null | undefined, arg: any, checkAllowed: boolean): Promise<void> {
-    if (
-      cb
-      && (!checkAllowed || await isWatchAllowed(false))
-    ) {
-      cb(arg);
-    }
+async function callGeoCb(cb: PositionCallback, pos: MutableGeolocationPosition, checkAllowed: boolean): Promise<void>;
+async function callGeoCb(cb: PositionErrorCallback | null | undefined, error: GeolocationPositionError, checkAllowed: boolean): Promise<void>;
+async function callGeoCb(cb: PositionCallback | PositionErrorCallback | null | undefined, arg: any, checkAllowed: boolean): Promise<void> {
+  if (
+    cb
+    && (!checkAllowed || await isWatchAllowed(false))
+  ) {
+    cb(arg);
   }
+}
 
+export const spoofLocation = (): void => {
   // We replace geolocation methods with our own.
   // getCurrentPosition will be called by the content script (not by the page)
   // so we dont need to keep it at all.
@@ -32,9 +32,9 @@ export const spoofLocation = (): void => {
     // call cb1 on success, cb2 on failure
     const res = await getNoisyPosition(options);
     if (res.success) {
-      callCb(positionCb, res.position, false);
+      callGeoCb(positionCb, res.position, false);
     } else {
-      callCb(positionOnError, res.position, false);
+      callGeoCb(positionOnError, res.position, false);
     }
     // callCb(res.success ? positionCb : positionOnError, res.position, false);
   };
@@ -53,8 +53,8 @@ export const spoofLocation = (): void => {
         handlers.set(
           handler,
           watchPosition.apply(navigator.geolocation, [
-            position => callCb(cb1, position, true), // ignore the call if privacy protection
-            error => callCb(cb2, error, true), // becomes active later!
+            position => callGeoCb(cb1, position, true), // ignore the call if privacy protection
+            error => callGeoCb(cb2, error, true), // becomes active later!
             options
           ])
         );
