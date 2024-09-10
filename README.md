@@ -1,1 +1,1 @@
-# location-guard-userscript
+# Location Guard (UserScript)

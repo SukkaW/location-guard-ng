@@ -181,8 +181,12 @@ async function addNoise(position: MutableGeolocationPosition) {
       position.coords.longitude = noisy.longitude;
 
       // update accuracy
-      const updateAccuracy = await getStoredValueAsync('updateAccuracy');
-      if (position.coords.accuracy && updateAccuracy) position.coords.accuracy += Math.round(PlanarLaplace.alphaDeltaAccuracy(epsilon, .9));
+      if (
+        position.coords.accuracy
+        && await getStoredValueAsync('updateAccuracy')
+      ) {
+        position.coords.accuracy += Math.round(PlanarLaplace.alphaDeltaAccuracy(epsilon, .9));
+      }
 
       // don't know how to add noise to those, so we set to null (they're most likely null anyway)
       position.coords.altitude = null;

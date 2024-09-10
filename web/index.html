@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Location Guard | Sukka (@SukkaW)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+    <link href="https://cdn.skk.moe/favicon.ico" rel="icon" type="image/ico">
+    <link href="https://cdn.skk.moe/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
+    <link href="https://cdn.skk.moe/favicon/android-chrome-192x192.png" rel="icon" type="image/png" sizes="192x192">
+    <link href="https://cdn.skk.moe/favicon/favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
+    <link href="https://cdn.skk.moe/favicon/favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
+
+    <meta name="theme-color" content="#f5f5f5">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/recipage@0.1.1/dist/recipage.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emojify.js@1.1.0/dist/css/sprites/emojify.css">
+
+    <meta name="description" content="A UserScript that hide/spoof your geographic location from websites | 一个可以对你正在访问的网站隐藏/伪装你地理位置的用户脚本 | Made by Sukka (@SukakW)">
+
+    <meta property="og:title" content="Location Guard | Sukka (@SukkaW)">
+    <meta property="og:type" content="Website">
+    <meta property="og:url" content="https://location-guard.skk.moe/">
+    <meta property="og:image" content="https://cdn.skk.moe/favicon/android-chrome-192x192.png">
+    <meta property="og:description" content="A UserScript that hide/spoof your geographic location from websites | 一个可以对你正在访问的网站隐藏/伪装你地理位置的用户脚本 | Made by Sukka (@SukakW)">
+    <meta name="twitter:card" content="summary">
+    <link rel="canonical" href="https://location-guard.skk.moe/">
+</head>
+</head>
+
+<body>
+    <div id="location-guard-config-gui">
+        <p style="padding: 16px; font-size: 18px; color: #445566;">
+            <strong>You have not installed Location Guard yet.</strong>
+        </p>
+        <div id="app"></div>
+    </div>
+</body>
+
+<script>
+    window.$recipage = {
+        // TODO: replace this
+        url: 'https://cdn.jsdelivr.net/gh/SukkaW/Surge@master/README.md',
+        github: 'https://github.com/SukkaW/location-guard',
+        footer: {
+            title: 'Location Guard | Sukka (@SukkaW)'
+        },
+        ready: false,
+        callback() {
+            window.dispatchEvent(new CustomEvent('recipage-ready', { detail: '' }));
+            window.$recipage.ready = true;
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/recipage@0.1.1"></script>
+
+</html>

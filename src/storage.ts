@@ -1,7 +1,10 @@
 import type { MutableGeolocationPosition, Position } from './types';
 
-type Level = 'fixed' | 'real' | NoisyLevel;
+export type Level = 'fixed' | 'real' | NoisyLevel;
 type NoisyLevel = 'low' | 'medium' | 'high';
+
+const validLevels = new Set(['fixed', 'real', 'low', 'medium', 'high']);
+export const isLevel = (level: unknown): level is Level => validLevels.has(level as string);
 
 export interface StoredValues {
   defaultLevel: Level,
@@ -54,4 +57,11 @@ export function getStoredValueAsync<T extends keyof StoredValues>(key: T, provid
 
 export function setStoredValueAsync<T extends keyof StoredValues>(key: T, value: StoredValues[T]): Promise<void> {
   return GM.setValue(key, value as any);
+}
+
+export function getStoredValueSync<T extends keyof StoredValues>(key: T, providedDefaultValue?: StoredValues[T]): StoredValues[T] {
+  return GM_getValue(key, providedDefaultValue ?? DEFAULT_VALUE[key]);
+}
+export function setStoredValueSync<T extends keyof StoredValues>(key: T, value: StoredValues[T]): void {
+  return GM_setValue(key, value as any);
 }

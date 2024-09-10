@@ -1,7 +1,18 @@
 {
   "name": "Location Guard",
   "namespace": "https://skk.moe",
-  "grant": ["none"],
-  "run-at": "document-start",
-  "include": []
+  "grant": [
+    "GM_getValue",
+    "GM_setValue",
+    "GM.getValue",
+    "GM.setValue",
+    "GM_deleteValue",
+    "GM.deleteValue",
+    "GM_addValueChangeListener",
+    "GM_removeValueChangeListener",
+    "GM.addValueChangeListener",
+    "GM.removeValueChangeListener"
+  ],
+  "run-at": "document-end",
+  "match": ["*://*/*"]
 }
