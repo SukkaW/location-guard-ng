@@ -1,5 +1,6 @@
 import { swc, defineRollupSwcOption } from 'rollup-plugin-swc3';
 import metablock from 'rollup-plugin-userscript-metablock';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import pkgJson from './package.json';
 import { defineConfig } from 'rollup';
 
@@ -30,6 +31,7 @@ export default defineConfig([
           externalHelpers: true
         }
       })),
+      nodeResolve(),
       metablock(userScriptMetaBlockConfig)
     ],
     external: ['typed-query-selector']

@@ -4,11 +4,11 @@ import { PlanarLaplace } from './laplace';
 import { klona } from 'klona/lite';
 import type { MutableGeolocationCoords, MutableGeolocationPosition } from './types';
 
-// eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function
+// eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const watchPosition = navigator.geolocation.watchPosition;
-// eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function
+// eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const getCurrentPosition = navigator.geolocation.getCurrentPosition;
-// eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function
+// eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const clearWatch = navigator.geolocation.clearWatch;
 
 export const spoofLocation = (): void => {
