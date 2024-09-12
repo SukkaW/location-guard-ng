@@ -96,8 +96,6 @@ interface NoisyPositionResultFailure {
 }
 
 async function getNoisyPosition(opt: PositionOptions | undefined): Promise<NoisyPositionResultSuccess | NoisyPositionResultFailure> {
-  // const st = await Browser.storage.get();
-
   // if level == 'fixed' and fixedPosNoAPI == true, then we return the
   // fixed position without calling the geolocation API at all.
   //

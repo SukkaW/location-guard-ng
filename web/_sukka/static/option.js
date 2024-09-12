@@ -10,7 +10,7 @@ const geocoderKey = '5b3ce3597851110001cf6248dc55f0492abe4923aa33f4ca1722acb8';
 const geocoderUrl = 'https://api.openrouteservice.org/geocode';
 
 let levelMap, fixedPosMap;
-let epsilon;
+// let epsilon;
 let activeLevel = 'medium';
 const inited = {};
 let sliderRadius, sliderCacheTime;
@@ -21,10 +21,9 @@ let currentPos = {
   longitude: 2.356_910_705_566_406
 };
 
-Browser.init('options');
-(async function () {
-  epsilon = (await Browser.storage.get()).epsilon;
-}());
+// (async function () {
+//   epsilon = (await Browser.storage.get()).epsilon;
+// }());
 
 // slider wrapper class, cause sGlide interface sucks
 function Slider(opt) {
@@ -75,7 +74,6 @@ async function saveOptions() {
   }
 
   await Browser.storage.set(st);
-  Browser.gui.refreshAllIcons();
 }
 
 async function saveFixedPosNoAPI() {
@@ -110,8 +108,8 @@ function initLevelMap() {
   // map
   levelMap = L.map('levelMap')
     .addLayer(new L.TileLayer(
-      Browser.gui.mapTiles().url,
-      Browser.gui.mapTiles().info
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { attribution: 'Map data © OpenStreetMap contributors' }
     ))
     .setView(latlng, 13)
     .on('dragstart', () => {
@@ -197,8 +195,8 @@ async function initFixedPosMap() {
   // eslint-disable-next-line new-cap -- third party library
   fixedPosMap = new L.map('fixedPosMap')
     .addLayer(new L.TileLayer(
-      Browser.gui.mapTiles().url,
-      Browser.gui.mapTiles().info
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { attribution: 'Map data © OpenStreetMap contributors' }
     ))
     .setView(latlng, 14)
     .on('dragstart', () => {
@@ -272,7 +270,7 @@ async function saveFixedPos(latlng) {
 
   fixedPosMap.marker.setLatLng(latlng);
 
-  Browser.log('saving st', st);
+  console.log('saving st', st);
   await Browser.storage.set(st);
 }
 
@@ -444,7 +442,7 @@ function showCurrentPosition() {
       showLevelInfo(); // moves circles and also centers map
     },
     (err) => {
-      Browser.log('cannot get location', err);
+      console.log('cannot get location', err);
     }
   );
 }
@@ -452,7 +450,6 @@ function showCurrentPosition() {
 async function restoreDefaults() {
   if (window.confirm('Are you sure you want to restore the default options?')) {
     await Browser.storage.clear();
-    await Browser.gui.refreshAllIcons();
     location.reload();
   }
 }
