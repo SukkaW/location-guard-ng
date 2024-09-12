@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Location Guard</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-mobile-babel-safe@1.4.5-1/css/jquery.mobile-1.4.5.min.css" />
+
+    <style>
+        /*
+	the best way to autoresize the popup is to let #container expand to fit its contents, then set the html/body's
+	width/height to those of #container using js. We initially set html/body's width/height to 0 to avoid resizes in chrome.
+	We also need to override width/min-height from jqm's CCS.
+	*/
+        html,
+        body {
+            width: 0px;
+            height: 0px;
+            overflow: hidden;
+            /* avoid momentary display of scrollbars */
+        }
+
+        #container {
+            width: auto;
+            min-height: 0;
+
+            line-height: 1;
+        }
+
+        .ui-btn {
+            padding-top: 0.65em;
+            padding-bottom: 0.65em;
+        }
+
+        .ui-header {
+            font-size: 0.9em;
+        }
+
+        .ui-listview a {
+            font-size: 0.88em;
+            font-weight: normal;
+        }
+
+        .ui-controlgroup {
+            margin: 0;
+            border-radius: 0;
+        }
+
+        #levels {
+            border: 0;
+        }
+
+        #levels label {
+            font-weight: normal;
+            font-size: 0.88em;
+            padding: 0.55em 1em 0.55em 2.5em;
+        }
+
+        #close {
+            width: auto;
+            margin: auto;
+            margin-top: 1.5em;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+            font-size: 0.88em;
+            display: none;
+        }
+
+        .ui-icon-pin:after {
+            background-image: url("images/pin_16.png");
+        }
+
+        .ui-icon-pause:after {
+            background-image: url("images/pause.png");
+        }
+
+        .ui-icon-play:after {
+            background-image: url("images/play.png");
+        }
+
+        /* this prevents the title from being cut */
+        .ui-header .ui-title {
+            margin-left: 0em;
+            margin-right: 0em;
+        }
+
+        /* prevents loading of ajax-loader.gif */
+        .ui-icon-loading {
+            background: none !important;
+        }
+    </style>
+
+    <script src="js/common.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sglide@2.1.1/jquery.sglide.min.js"></script>
+    <script>
+        if (!window.jQuery) {
+            window.jQuery = window.$;
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-migrate@3.5.2/dist/jquery-migrate.min.js"></script>
+    <script>
+        window.jQuery.migrateMute = true; // but no need for the warnings
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-mobile-babel-safe@1.4.5-1/js/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pelias-leaflet-plugin@1.12.0/dist/leaflet-geocoder-mapzen.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.81.1/dist/L.Control.Locate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/minified/intro.min.js"></script>
+
+    <script src="js/gui/popup.js"></script>
+</head>
+
+<body>
+    <div data-role="page" id="container" data-title="Location Guard">
+        <div data-role="header">
+            <h1 id="title"></h1>
+        </div>
+        <div data-role="popup" id="levels">
+            <div data-role="controlgroup">
+                <input name="level" id="fixed" type="radio"><label for="fixed">Use fixed location</label>
+                <input name="level" id="high" type="radio"><label for="high">High</label>
+                <input name="level" id="medium" type="radio"><label for="medium">Medium</label>
+                <input name="level" id="low" type="radio"><label for="low">Low</label>
+                <input name="level" id="real" type="radio"><label for="real">Use real location</label>
+            </div>
+        </div>
+        <ul data-role="listview" class="ui-alt-icon ui-nodisc-icon">
+            <li data-icon="carat-r"><a href="#" id="setLevel">Set level for <b></b></a></li>
+            <li data-icon="pause"><a href="#" id="pause"></a></li>
+            <li data-icon="pin"><a href="#" id="hideIcon">Hide icon</a></li>
+            <li data-icon="gear"><a href="#" id="options">Options</a></li>
+            <li data-icon="info"><a href="#" id="faq">What is Location Guard?</a></li>
+        </ul>
+        <button class="ui-btn" id="close">Close</button>
+    </div><!-- /page -->
+</body>
+
+</html>

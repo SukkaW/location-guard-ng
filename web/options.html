@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Location Guard</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-mobile-babel-safe@1.4.5-1/css/jquery.mobile-1.4.5.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pelias-leaflet-plugin@1.12.0/dist/leaflet-geocoder-mapzen.min.css">
+
+    <link rel="stylesheet" href="/_sukka/static/options.css">
+
+    <script src="js/common.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sglide@2.1.1/jquery.sglide.min.js"></script>
+    <script>
+        if (!window.jQuery) {
+            window.jQuery = window.$;
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-migrate@3.5.2/dist/jquery-migrate.min.js"></script>
+    <script>
+        window.jQuery.migrateMute = true; // but no need for the warnings
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-mobile-babel-safe@1.4.5-1/js/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pelias-leaflet-plugin@1.12.0/dist/leaflet-geocoder-mapzen.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.81.1/dist/L.Control.Locate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/minified/intro.min.js"></script>
+
+    <script src="js/gui/options.js"></script>
+</head>
+
+<body class="ui-alt-icon ui-nodisc-icon">
+    <div data-role="page" id="options" data-title="Location Guard" class="page">
+        <div data-role="header">
+            <a href="#left-panel" class="ui-btn ui-btn-icon-notext ui-icon-bars"></a>
+            <h1>Options</h1>
+        </div>
+
+        <div role="main" class="ui-content">
+            Default level:
+            <select id="defaultLevel">
+                <option value="fixed">Use fixed location</option>
+                <option value="high">High</option>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+                <option value="real">Use real location</option>
+            </select>
+            <div data-role="controlgroup">
+                <label><input id="paused" type="checkbox">Pause</label>
+                <label><input id="hideIcon" type="checkbox">Hide icon</label>
+                <label><input id="updateAccuracy" type="checkbox">Update accuracy<p class="small-font no-space">adapts the reported accuracy to the amount of added noise</p></label>
+            </div>
+            <div data-role="controlgroup">
+                <button class="ui-btn" id='deleteCache'>Delete fake location cache</button>
+                <button class="ui-btn" id='restoreDefaults'>Restore default options</button>
+            </div>
+            <div data-role="controlgroup">
+                <button class="ui-btn showFAQ" faq="general">What is Location Guard?</button>
+                <button class="ui-btn reportIssue" faq="general">Report an issue</button>
+            </div>
+        </div>
+    </div><!-- /page -->
+
+    <div data-role="page" id="levels" data-title="Location Guard" class="page">
+        <div data-role="header">
+            <a href="#left-panel" class="flat-btn ui-btn ui-btn-icon-notext ui-icon-bars"></a>
+            <h1>Privacy Levels</h1>
+        </div>
+
+        <div role="main" class="ui-content no-space">
+            <div id="activeLevel" data-role="navbar">
+                <ul>
+                    <li><a level="low" href="#">Low</a></li>
+                    <li><a level="medium" href="#" class="ui-btn-active">Medium</a></li>
+                    <li><a level="high" href="#">High</a></li>
+                </ul>
+            </div>
+            <div class="ui-bar">
+                <div class="no-space">
+                    <p style="float: left" class="no-space">Protection: <b><span id="radius"></span> m</b></p>
+                    <p style="float: right" class="no-space">Accuracy: <b><span id="accuracy"></span> m</b></p>
+                    <p style="clear: both"></p>
+                </div>
+                <div id="setRadius" class="slider"></div>
+
+                <div class="no-space">Cache location for: <b><span id="cacheTime"></span></b></div>
+                <div id="setCacheTime" class="slider"></div>
+            </div>
+
+            <div id="levelMap" class="flex"></div>
+        </div>
+    </div><!-- /page -->
+
+    <div data-role="page" id="fixedPos" data-title="Location Guard" class="page">
+        <div data-role="header">
+            <a href="#left-panel" class="flat-btn ui-btn ui-btn-icon-notext ui-icon-bars"></a>
+            <h1>Fixed Location</h1>
+        </div>
+
+        <div role="main" class="ui-content no-space">
+            <div id="fixedPosMap" class="flex"></div>
+
+            <div data-role="controlgroup" class="no-space">
+                <label>
+                    <input id="fixedPosNoAPI" type="checkbox">Fixed location disables geolocation
+                    <p class="small-font no-space"><b>warning: </b> this also disables the permission dialog</p>
+                </label>
+                <button class="ui-btn showFAQ" faq="fixed">What is a "fixed location"?</button>
+            </div>
+        </div>
+    </div><!-- /page -->
+
+    <div data-role="panel" id="left-panel" data-position="left" data-display="overlay" data-theme="a">
+        <ul data-role="listview">
+            <li data-icon="none" class="menu-title" data-theme="b">Location Guard</li>
+            <li data-icon="gear"><a href="#options">Options</a></li>
+            <li data-icon="eye"><a href="#levels">Privacy Levels</a></li>
+            <li data-icon="location"><a href="#fixedPos">Fixed Location</a></li>
+            <li data-icon="info"><a href="faq.html#general">FAQ</a></li>
+        </ul>
+    </div><!-- /panel -->
+</body>
+
+</html>
