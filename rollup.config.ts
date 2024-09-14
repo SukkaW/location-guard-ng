@@ -8,6 +8,7 @@ import replace from '@rollup/plugin-replace';
 import alias from '@rollup/plugin-alias';
 
 import pkgJson from './package.json';
+import process from 'node:process';
 
 const userScriptMetaBlockConfig = {
   file: './userscript.meta.json',

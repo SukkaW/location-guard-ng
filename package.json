@@ -15,7 +15,8 @@
     "dev": "WATCH=true rollup --configPlugin rollup-plugin-swc3 -c --bundleConfigAsCjs --watch",
     "build": "rollup --configPlugin rollup-plugin-swc3 -c --bundleConfigAsCjs",
     "lint": "eslint --format=sukka .",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "pnpm run build",
+    "prerelease": "pnpm run lint && pnpm run build",
     "release": "bumpp -r --all --commit \"release: %s\" --tag \"%s\""
   },
   "keywords": [
