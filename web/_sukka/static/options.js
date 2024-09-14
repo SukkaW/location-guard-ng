@@ -14,8 +14,8 @@ const locationGuardReady = new Promise((resolve) => {
   }
 });
 
-const geocoderKey = '5b3ce3597851110001cf6248dc55f0492abe4923aa33f4ca1722acb8';
-const geocoderUrl = 'https://api.openrouteservice.org/geocode';
+// const geocoderKey = '5b3ce3597851110001cf6248dc55f0492abe4923aa33f4ca1722acb8';
+// const geocoderUrl = 'https://api.openrouteservice.org/geocode';
 
 let levelMap, fixedPosMap;
 // let epsilon;
@@ -184,13 +184,14 @@ function initLevelMap() {
     .addTo(levelMap);
 
   // geocoder control
-  L.control.geocoder(geocoderKey, {
-    url: geocoderUrl,
-    markers: false,
-    autocomplete: false
-  }).on('highlight', handleChangePosEvent)
-    .on('select', handleChangePosEvent)
-    .addTo(levelMap);
+  // TODO: use a new key
+  // L.control.geocoder(geocoderKey, {
+  //   url: geocoderUrl,
+  //   markers: false,
+  //   autocomplete: false
+  // }).on('highlight', handleChangePosEvent)
+  //   .on('select', handleChangePosEvent)
+  //   .addTo(levelMap);
 }
 
 async function initFixedPosMap() {
@@ -253,21 +254,21 @@ async function initFixedPosMap() {
   }).addTo(fixedPosMap);
 
   // geocoder control
-  L.control.geocoder(geocoderKey, {
-    url: geocoderUrl,
-    markers: false,
-    autocomplete: false
-  }).on('results', function (e) {
-    // directly set position if the text is a latlon
-    // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-misleading-capturing-group -- safe
-    const res = e.params.text.match(/^([+-]?\d+\.\d+)\s*(?:,\s*)?([+-]?\d+\.\d+)$/);
-    if (!res) return;
+  // L.control.geocoder(geocoderKey, {
+  //   url: geocoderUrl,
+  //   markers: false,
+  //   autocomplete: false
+  // }).on('results', function (e) {
+  //   // directly set position if the text is a latlon
+  //   // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-misleading-capturing-group -- safe
+  //   const res = e.params.text.match(/^([+-]?\d+\.\d+)\s*(?:,\s*)?([+-]?\d+\.\d+)$/);
+  //   if (!res) return;
 
-    const latlng = L.latLng(Number.parseFloat(res[1]), Number.parseFloat(res[2]));
-    saveFixedPos(latlng);
-    fixedPosMap.setView(latlng, 14);
-    this.collapse(); // close the geocoder search
-  }).addTo(fixedPosMap);
+  //   const latlng = L.latLng(Number.parseFloat(res[1]), Number.parseFloat(res[2]));
+  //   saveFixedPos(latlng);
+  //   fixedPosMap.setView(latlng, 14);
+  //   this.collapse(); // close the geocoder search
+  // }).addTo(fixedPosMap);
 }
 
 async function saveFixedPos(latlng) {
