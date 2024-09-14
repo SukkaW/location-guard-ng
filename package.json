@@ -32,24 +32,24 @@
     "klona": "^2.0.6"
   },
   "devDependencies": {
-    "@eslint-sukka/node": "^6.4.2",
+    "@eslint-sukka/node": "^6.4.3",
     "@rollup/plugin-alias": "^5.1.0",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-replace": "^5.0.7",
-    "@swc/core": "^1.7.24",
-    "@types/greasemonkey": "^4.0.7",
+    "@swc/core": "^1.7.26",
     "@types/greasemonkey3": "npm:@types/greasemonkey@^3.0.3",
-    "@types/node": "^22.5.4",
+    "@types/greasemonkey": "^4.0.7",
+    "@types/node": "^22.5.5",
     "bumpp": "^9.5.2",
     "eslint": "^9.10.0",
-    "eslint-config-sukka": "^6.4.2",
-    "eslint-formatter-sukka": "^6.4.2",
-    "rollup": "^4.21.2",
+    "eslint-config-sukka": "^6.4.3",
+    "eslint-formatter-sukka": "^6.4.3",
+    "rollup": "^4.21.3",
     "rollup-plugin-swc3": "^0.11.2",
     "rollup-plugin-userscript-metablock": "^0.4.2",
     "typed-query-selector": "^2.12.0",
     "typescript": "^5.6.2"
   },
-  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
+  "packageManager": "pnpm@9.10.0"
 }
