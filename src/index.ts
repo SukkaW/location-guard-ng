@@ -7,7 +7,7 @@ import { renderConfigUI } from './ui';
 
   if (
     window.location.host === 'localhost:3000'
-    || window.location.host === 'location-guard.skk.moe'
+    || window.location.host === 'location-guard-ng.skk.moe'
   ) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', renderConfigUI);

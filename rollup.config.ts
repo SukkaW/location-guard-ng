@@ -24,7 +24,7 @@ export default defineConfig([
     input: 'src/index.ts',
     output: [{
       format: 'iife',
-      file: 'dist/location-guard.user.js',
+      file: 'dist/location-guard-ng.user.js',
       sourcemap: false,
       esModule: false,
       compact: true,
@@ -71,7 +71,7 @@ export default defineConfig([
   {
     input: 'src/dummy.js',
     output: [{
-      file: 'dist/location-guard.meta.js'
+      file: 'dist/location-guard-ng.meta.js'
     }],
     plugins: [
       metablock(userScriptMetaBlockConfig)

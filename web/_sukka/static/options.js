@@ -17,7 +17,7 @@ const locationGuardReady = new Promise((resolve) => {
   setTimeout(() => {
     if (!('$locationGuard' in window)) {
       window.alert('Location Guard UserScript is missing, please install it first!');
-      window.location.assign('https://location-guard.skk.moe');
+      window.location.assign('https://location-guard-ng.skk.moe');
       resolve();
     }
   }, 1000);
@@ -507,7 +507,7 @@ $(document).ready(() => {
   });
 
   $('.reportIssue').click(() => {
-    window.open('https://github.com/SukkaW/location-guard/issues', '_blank');
+    window.open('https://github.com/SukkaW/location-guard-ng/issues', '_blank');
   });
 
   $(document).on('click', '#levelMapCurrentPos', showCurrentPosition); // this doesn't exist yet (it's inside the popup), so we set in document

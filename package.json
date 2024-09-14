@@ -4,9 +4,9 @@
   "description": "A UserScript that hide/spoof your geographic location from websites.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SukkaW/location-guard.git"
+    "url": "https://github.com/SukkaW/location-guard-ng.git"
   },
-  "main": "dist/location-guard.user.js",
+  "main": "dist/location-guard-ng.user.js",
   "files": [
     "dist"
   ],

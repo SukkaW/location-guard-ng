@@ -9,11 +9,14 @@
     "GM.setValue",
     "GM_deleteValue",
     "GM.deleteValue",
+    "GM.registerMenuCommand",
     "GM_addValueChangeListener",
     "GM_removeValueChangeListener",
     "GM.addValueChangeListener",
     "GM.removeValueChangeListener"
   ],
   "run-at": "document-end",
-  "match": ["*://*/*"]
+  "match": ["*://*/*"],
+  "updateURL": "https://cdn.jsdelivr.net/npm/location-guard@latest/dist/location-guard-ng.meta.js",
+  "downloadURL": "https://cdn.jsdelivr.net/npm/location-guard@latest/dist/location-guard-ng.user.js"
 }
