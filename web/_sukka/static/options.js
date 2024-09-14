@@ -12,6 +12,15 @@ const locationGuardReady = new Promise((resolve) => {
   } else {
     window.addEventListener('location-guard-config-ui-ready', resolve, { once: true });
   }
+
+  // eslint-disable-next-line sukka/prefer-timer-id -- safe
+  setTimeout(() => {
+    if (!('$locationGuard' in window)) {
+      window.alert('Location Guard UserScript is missing, please install it first!');
+      window.location.assign('https://location-guard.skk.moe');
+      resolve();
+    }
+  }, 1000);
 });
 
 // const geocoderKey = '5b3ce3597851110001cf6248dc55f0492abe4923aa33f4ca1722acb8';
