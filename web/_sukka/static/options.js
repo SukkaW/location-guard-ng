@@ -4,7 +4,7 @@ const $ = window.$;
 const L = window.L;
 
 // const Browser = require('../common/browser');
-const PlanarLaplace = window.PlanarLaplace;
+// const PlanarLaplace = window.PlanarLaplace;
 
 const geocoderKey = '5b3ce3597851110001cf6248dc55f0492abe4923aa33f4ca1722acb8';
 const geocoderUrl = 'https://api.openrouteservice.org/geocode';
