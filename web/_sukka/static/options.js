@@ -506,9 +506,6 @@ $(document).ready(() => {
     showLevelInfo();
   });
 
-  $('.showFAQ').click((e) => {
-    location.href = 'faq.html#' + $(e.target).attr('faq');
-  });
   $('.reportIssue').click(() => {
     window.open('https://github.com/SukkaW/location-guard/issues', '_blank');
   });
