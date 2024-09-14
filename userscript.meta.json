@@ -17,6 +17,6 @@
   ],
   "run-at": "document-end",
   "match": ["*://*/*"],
-  "updateURL": "https://cdn.jsdelivr.net/npm/location-guard@latest/dist/location-guard-ng.meta.js",
-  "downloadURL": "https://cdn.jsdelivr.net/npm/location-guard@latest/dist/location-guard-ng.user.js"
+  "updateURL": "https://unpkg.com/location-guard@latest/dist/location-guard-ng.meta.js",
+  "downloadURL": "https://unpkg.com/location-guard@latest/dist/location-guard-ng.user.js"
 }

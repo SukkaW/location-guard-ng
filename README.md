@@ -10,7 +10,7 @@
 
 ## Installation
 
-https://cdn.jsdelivr.net/npm/location-guard@latest/dist/location-guard-ng.user.js
+https://unpkg.com/location-guard@latest/dist/location-guard-ng.user.js
 
 ## TODO
 
