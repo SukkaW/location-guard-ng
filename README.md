@@ -12,6 +12,12 @@
 
 https://unpkg.com/location-guard@latest/dist/location-guard-ng.user.js
 
+## Configuration
+
+After installing the UserScript, you can configure it by opening your user script manager menu, where the "Options" menu item can be found under the "Location Guard Ng" menu. You can also access the configuration page directly by visiting the following URL:
+
+https://location-guard-ng.skk.moe/options
+
 ## TODO
 
 - [ ] New configuration UI
