@@ -2,6 +2,7 @@
   "name": "Location Guard",
   "namespace": "https://skk.moe",
   "grant": [
+    "unsafeWindow",
     "GM_getValue",
     "GM_setValue",
     "GM.getValue",

@@ -6,6 +6,14 @@ const L = window.L;
 // const Browser = require('../common/browser');
 // const PlanarLaplace = window.PlanarLaplace;
 
+const locationGuardReady = new Promise((resolve) => {
+  if ('$locationGuard' in window && window.$locationGuard.ready) {
+    resolve();
+  } else {
+    window.addEventListener('location-guard-config-ui-ready', resolve, { once: true });
+  }
+});
+
 const geocoderKey = '5b3ce3597851110001cf6248dc55f0492abe4923aa33f4ca1722acb8';
 const geocoderUrl = 'https://api.openrouteservice.org/geocode';
 
@@ -20,10 +28,6 @@ let currentPos = {
   latitude: 48.860_141_066_724_41,
   longitude: 2.356_910_705_566_406
 };
-
-// (async function () {
-//   epsilon = (await Browser.storage.get()).epsilon;
-// }());
 
 // slider wrapper class, cause sGlide interface sucks
 function Slider(opt) {
@@ -53,38 +57,36 @@ function Slider(opt) {
 }
 
 async function saveOptions() {
-  const st = await Browser.storage.get();
-  st.defaultLevel = $('#defaultLevel').val();
-  st.paused = $('#paused').prop('checked');
-  st.hideIcon = $('#hideIcon').prop('checked');
+  await locationGuardReady;
+
+  window.$locationGuard.setValue('defaultLevel', $('#defaultLevel').val());
+  window.$locationGuard.setValue('paused', $('#paused').prop('checked'));
 
   const updateAccuracy = $('#updateAccuracy').prop('checked');
-  if (st.updateAccuracy !== updateAccuracy) {
+  if (await window.$locationGuard.getValue('updateAccuracy') !== updateAccuracy) {
+    const PlanarLaplace = window.$locationGuard.PlanarLaplace;
+    const $epsilon = window.$locationGuard.epsilon;
+    const $levels = await window.$locationGuard.getValue('levels');
+    const $cachedPos = await window.$locationGuard.getValue('cachedPos');
+
     // update accuracy of cached positions to reflect the change
     // eslint-disable-next-line guard-for-in -- plain object
-    for (const level in st.cachedPos) {
-      const epsilon = st.epsilon / st.levels[level].radius;
-      const pl = new PlanarLaplace();
-
-      st.cachedPos[level].position.coords.accuracy // add/remove the .9 accuracy
-        += (updateAccuracy ? 1 : -1) * Math.round(pl.alphaDeltaAccuracy(epsilon, .9));
+    for (const level in $cachedPos) {
+      const epsilon = $epsilon / $levels[level].radius;
+      $cachedPos[level].position.coords.accuracy // add/remove the .9 accuracy
+        += (updateAccuracy ? 1 : -1) * Math.round(PlanarLaplace.alphaDeltaAccuracy(epsilon, .9));
     }
 
-    st.updateAccuracy = updateAccuracy;
+    await window.$locationGuard.setValue('cachedPos', $cachedPos);
+    await window.$locationGuard.setValue('updateAccuracy', updateAccuracy);
   }
-
-  await Browser.storage.set(st);
-}
-
-async function saveFixedPosNoAPI() {
-  const st = await Browser.storage.get();
-  st.fixedPosNoAPI = $('#fixedPosNoAPI').prop('checked');
-
-  await Browser.storage.set(st);
 }
 
 async function saveLevel() {
-  const st = await Browser.storage.get();
+  await locationGuardReady;
+  const $levels = await window.$locationGuard.getValue('levels');
+  const $cachedPos = await window.$locationGuard.getValue('cachedPos');
+
   const radius = sliderRadius.value;
   const ct = sliderCacheTime.value;
   const cacheTime = ct <= 59 ? ct : 60 * (ct - 59);
@@ -92,14 +94,17 @@ async function saveLevel() {
   updateRadius(radius, true);
 
   // delete cache for that level if radius changes
-  if (st.levels[activeLevel].radius !== radius) delete st.cachedPos[activeLevel];
+  if ($levels[activeLevel].radius !== radius) {
+    delete $cachedPos[activeLevel];
+  }
 
-  st.levels[activeLevel] = {
+  $levels[activeLevel] = {
     radius,
     cacheTime
   };
 
-  await Browser.storage.set(st);
+  await window.$locationGuard.setValue('levels', $levels);
+  await window.$locationGuard.setValue('cachedPos', $cachedPos);
 }
 
 function initLevelMap() {
@@ -189,8 +194,10 @@ function initLevelMap() {
 }
 
 async function initFixedPosMap() {
-  const st = await Browser.storage.get();
-  const latlng = [st.fixedPos.latitude, st.fixedPos.longitude];
+  await locationGuardReady;
+
+  const $fixedPos = await window.$locationGuard.getValue('fixedPos');
+  const latlng = [$fixedPos.latitude, $fixedPos.longitude];
 
   // eslint-disable-next-line new-cap -- third party library
   fixedPosMap = new L.map('fixedPosMap')
@@ -264,21 +271,22 @@ async function initFixedPosMap() {
 }
 
 async function saveFixedPos(latlng) {
-  const st = await Browser.storage.get();
+  await locationGuardReady;
   const wrapped = latlng.wrap(); // force within normal range
-  st.fixedPos = { latitude: wrapped.lat, longitude: wrapped.lng };
+  const $fixedPos = { latitude: wrapped.lat, longitude: wrapped.lng };
 
   fixedPosMap.marker.setLatLng(latlng);
 
-  console.log('saving st', st);
-  await Browser.storage.set(st);
+  await window.$locationGuard.setValue('fixedPos', $fixedPos);
 }
 
 async function showLevelInfo() {
-  const st = await Browser.storage.get();
+  await locationGuardReady;
+  const $levels = await window.$locationGuard.getValue('levels');
+
   // set sliders' value
-  const radius = st.levels[activeLevel].radius;
-  const cacheTime = st.levels[activeLevel].cacheTime;
+  const radius = $levels[activeLevel].radius;
+  const cacheTime = $levels[activeLevel].cacheTime;
   const ct = cacheTime <= 59 // 0-59 are mins, 60 and higher are hours
     ? cacheTime
     : 59 + Math.floor(cacheTime / 59);
@@ -330,21 +338,25 @@ function showPopup(map) {
   $('.leaflet-popup-tip-container').css({ visibility: (smallSize ? 'hidden' : 'visible') });
 }
 
-function updateRadius(radius, fit) {
+async function updateRadius(radius, fit) {
+  await locationGuardReady;
+  const PlanarLaplace = window.$locationGuard.PlanarLaplace;
+  const epsilon = window.$locationGuard.epsilon;
+
   // update radius text and map
-  const acc = Math.round((new PlanarLaplace()).alphaDeltaAccuracy(epsilon / radius, .95));
+  const acc = Math.round(PlanarLaplace.alphaDeltaAccuracy(epsilon / radius, .95));
 
   moveCircles();
 
   levelMap.protection.setRadius(radius);
   levelMap.accuracy.setRadius(acc);
 
-  const first_view = !inited.radius;
+  const firstView = !inited.radius;
   inited.radius = true;
 
-  if (fit) levelMap.fitBounds(levelMap.accuracy.getBounds(), { animate: !first_view });
+  if (fit) levelMap.fitBounds(levelMap.accuracy.getBounds(), { animate: !firstView });
 
-  if (first_view) showPopup(levelMap);
+  if (firstView) showPopup(levelMap);
 
   $('#radius').text(radius);
   $('#accuracy').text(acc);
@@ -366,10 +378,6 @@ function initPages() {
   // $.mobile.hideUrlBar = false;
   // $.mobile.defaultPageTransition = "none";
 
-  $(document).ready(() => {
-    $('#hideIcon').parent().toggle(!Browser.capabilities.permanentIcon()); // hiding the icon only works with page action (not browser action)
-  });
-
   $(document).on('pagecontainershow', async (e, ui) => {
     const page = ui.toPage[0].id;
 
@@ -385,11 +393,14 @@ function initPages() {
     //
     switch (page) {
       case 'options': {
-        const st = await Browser.storage.get();
-        $('#defaultLevel').val(st.defaultLevel).selectmenu('refresh');
-        $('#paused').prop('checked', st.paused).checkboxradio('refresh');
-        $('#hideIcon').prop('checked', st.hideIcon).checkboxradio('refresh');
-        $('#updateAccuracy').prop('checked', st.updateAccuracy).checkboxradio('refresh');
+        await locationGuardReady;
+        const $defaultLevel = await window.$locationGuard.getValue('defaultLevel');
+        const $paused = await window.$locationGuard.getValue('paused');
+        const $updateAccuracy = await window.$locationGuard.getValue('updateAccuracy');
+
+        $('#defaultLevel').val($defaultLevel).selectmenu('refresh');
+        $('#paused').prop('checked', $paused).checkboxradio('refresh');
+        $('#updateAccuracy').prop('checked', $updateAccuracy).checkboxradio('refresh');
 
         break;
       }
@@ -420,9 +431,6 @@ function initPages() {
         break;
       }
       case 'fixedPos': {
-        const st = await Browser.storage.get();
-        $('#fixedPosNoAPI').prop('checked', st.fixedPosNoAPI).checkboxradio('refresh');
-
         initFixedPosMap();
 
         break;
@@ -449,15 +457,15 @@ function showCurrentPosition() {
 
 async function restoreDefaults() {
   if (window.confirm('Are you sure you want to restore the default options?')) {
-    await Browser.storage.clear();
+    await locationGuardReady;
+    await window.$locationGuard.resetConfig();
     location.reload();
   }
 }
 
 async function deleteCache() {
-  const st = await Browser.storage.get();
-  st.cachedPos = {};
-  await Browser.storage.set(st);
+  await locationGuardReady;
+  await window.$locationGuard.emptyCachedPos();
   window.alert('Location cache was deleted');
 }
 
@@ -477,7 +485,6 @@ $(document).ready(() => {
   });
 
   $('#options input, #options select').change(saveOptions);
-  $('#fixedPosNoAPI').change(saveFixedPosNoAPI);
 
   $('#restoreDefaults').click(restoreDefaults);
   $('#deleteCache').click(deleteCache);

@@ -96,9 +96,6 @@ interface NoisyPositionResultFailure {
 }
 
 async function getNoisyPosition(opt: PositionOptions | undefined): Promise<NoisyPositionResultSuccess | NoisyPositionResultFailure> {
-  // if level == 'fixed' and fixedPosNoAPI == true, then we return the
-  // fixed position without calling the geolocation API at all.
-  //
   // const domain = window.location.hostname;
   // TODO: per domain level
   const level = await getStoredValueAsync('defaultLevel');
