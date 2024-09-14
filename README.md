@@ -1,6 +1,6 @@
 # Location Guard Ng (UserScript)
 
-**Location Guard Ng** is a rewritten version of the original [Location Guard](https://github.com/chatziko/location-guard) browser extension that uses modern web technology and is now a UserScript. It allows to protect your location while using location-aware websites, by either adding controlled noise or completely spoof with the fixed coordinates. It supports the following UserScript managers:
+**Location Guard Ng** is a rewritten version of the original [Location Guard](https://github.com/chatziko/location-guard) browser extension (which has already became one of many victims of [the removal of MV2 support in Google Chrome](https://developer.chrome.com/docs/extensions/develop/migrate/mv2-deprecation-timeline)) that uses modern web technology and is now a UserScript. It allows to protect your location while using location-aware websites, by either adding controlled noise or completely spoof with the fixed coordinates. It supports the following UserScript managers:
 
 - [Tampermonkey](https://www.tampermonkey.net/)
 - [Violentmonkey](https://violentmonkey.github.io/)
@@ -151,7 +151,7 @@ of Nicolas Bordenabe.
 ----
 
 **Location Guard Ng** © [Sukka](https://github.com/SukkaW), Released under the [MIT](./LICENSE) License.
-Authored and maintained by Sukka with help from contributors ([list](https://github.com/SukkaW/bring-github-old-feed-back/graphs/contributors)).
+Authored and maintained by Sukka with help from contributors ([list](https://github.com/SukkaW/location-guard-ng/graphs/contributors)).
 
 > [Personal Website](https://skk.moe) · [Blog](https://blog.skk.moe) · GitHub [@SukkaW](https://github.com/SukkaW) · Telegram Channel [@SukkaChannel](https://t.me/SukkaChannel) · Mastodon [@sukka@acg.mn](https://acg.mn/@sukka) · Twitter [@isukkaw](https://twitter.com/isukkaw) · Keybase [@sukka](https://keybase.io/sukka)
 
