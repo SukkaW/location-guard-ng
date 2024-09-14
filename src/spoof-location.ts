@@ -16,7 +16,7 @@ async function callGeoCb(cb: PositionErrorCallback | null | undefined, error: Ge
 async function callGeoCb(cb: PositionCallback | PositionErrorCallback | null | undefined, arg: any, checkAllowed: boolean): Promise<void> {
   if (
     cb
-    && (!checkAllowed || await isWatchAllowed(false))
+    && (!checkAllowed || await isWatchAllowed())
   ) {
     cb(arg);
   }
@@ -48,7 +48,7 @@ export const spoofLocation = (): void => {
     const handler = Math.floor(Math.random() * 10000);
 
     (async () => {
-      if (await isWatchAllowed(true)) {
+      if (await isWatchAllowed()) {
         // We're allowed to call the real watchPosition (note: remember the handler)
         handlers.set(
           handler,
@@ -76,11 +76,11 @@ export const spoofLocation = (): void => {
 
 const inFrame = window !== window.top;
 
-async function isWatchAllowed(defaultAllowed = false) {
+async function isWatchAllowed() {
   // Returns true if using the real watch is allowed. Only if paused or level == 'real'.
   // Also don't allow in iframes (to simplify the code).
   const level = await getStoredValueAsync('defaultLevel'); // TODO: per domain level
-  const paused = await getStoredValueAsync('paused', defaultAllowed);
+  const paused = await getStoredValueAsync('paused');
 
   return !inFrame && (paused || level === 'real');
 }
