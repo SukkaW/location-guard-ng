@@ -129,4 +129,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# Turbo
+.turbo
+
+# macOS
 .DS_Store
