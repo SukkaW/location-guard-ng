@@ -1,20 +1,10 @@
 {
+  "extends": "location-guard-configs/tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
     "jsx": "preserve",
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "noEmit": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "skipLibCheck": true,
     "plugins": [
       {
         "name": "next"

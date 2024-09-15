@@ -13,6 +13,7 @@
     "eslint": "^9.10.0",
     "eslint-config-sukka": "^6.4.3",
     "eslint-formatter-sukka": "^6.4.3",
+    "location-guard-configs": "workspace:*",
     "turbo": "^2.1.2",
     "typescript": "^5.6.2"
   },
