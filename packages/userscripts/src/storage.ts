@@ -1,28 +1,4 @@
-import type { MutableGeolocationPosition, Position } from './types';
-
-export type Level = 'fixed' | 'real' | NoisyLevel;
-type NoisyLevel = 'low' | 'medium' | 'high';
-
-const validLevels = new Set(['fixed', 'real', 'low', 'medium', 'high']);
-export const isLevel = (level: unknown): level is Level => validLevels.has(level as string);
-
-export interface StoredValues {
-  defaultLevel: Level,
-  /** settings per level */
-  levels: Record<NoisyLevel, {
-    radius: number,
-    cacheTime: number
-  }>,
-  updateAccuracy: boolean,
-  epsilon: number,
-  cachedPos: Partial<Record<Level, {
-    epoch: number,
-    cacheTime: number,
-    position: MutableGeolocationPosition
-  }>>,
-  paused: boolean,
-  fixedPos: Position
-}
+import type { StoredValues } from 'location-guard-types';
 
 export const DEFAULT_VALUE: StoredValues = {
   defaultLevel: 'fixed',

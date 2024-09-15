@@ -4,15 +4,10 @@
 // selection of epsilon
 //
 
-import type { Position } from './types';
-
-export interface PositionXY {
-  x: number,
-  y: number
-}
+import type { Position, PositionXY, PlanarLaplaceLike } from 'location-guard-types';
 
 // constructor
-export const PlanarLaplace = {
+export const PlanarLaplace: PlanarLaplaceLike = {
   /** convert an angle in radians to degrees and viceversa */
   rad_of_deg(this: void, ang: number) {
     return ang * Math.PI / 180;

@@ -2,7 +2,7 @@ import { getStoredValueAsync, setStoredValueAsync } from './storage';
 
 import { PlanarLaplace } from './laplace';
 import { klona } from 'klona/lite';
-import type { MutableGeolocationCoords, MutableGeolocationPosition } from './types';
+import type { MutableGeolocationCoords, MutableGeolocationPosition } from 'location-guard-types';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const watchPosition = navigator.geolocation.watchPosition;

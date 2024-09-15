@@ -38,6 +38,7 @@
     "@types/greasemonkey": "^4.0.7",
     "@types/greasemonkey3": "npm:@types/greasemonkey@^3.0.3",
     "@types/node": "^22.5.5",
+    "location-guard-types": "workspace:*",
     "rollup": "^4.21.3",
     "rollup-plugin-swc3": "^0.11.2",
     "rollup-plugin-userscript-metablock": "^0.4.2",
