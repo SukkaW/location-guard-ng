@@ -3,6 +3,7 @@ import { getStoredValueAsync, setStoredValueAsync } from './storage';
 import { PlanarLaplace } from './laplace';
 import { klona } from 'klona/lite';
 import type { MutableGeolocationCoords, MutableGeolocationPosition } from 'location-guard-types';
+import { isMobileDevice, randomInt } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const watchPosition = navigator.geolocation.watchPosition;
@@ -104,18 +105,18 @@ async function getNoisyPosition(opt: PositionOptions | undefined): Promise<Noisy
   if (!paused && level === 'fixed') {
     const fixedPos = await getStoredValueAsync('fixedPos');
 
-    const noisy = {
+    const noisy: MutableGeolocationPosition = {
       coords: {
         latitude: fixedPos.latitude,
         longitude: fixedPos.longitude,
         accuracy: 10,
-        altitude: null,
-        altitudeAccuracy: null,
-        heading: null,
+        altitude: isMobileDevice() ? randomInt(10, 100) : null,
+        altitudeAccuracy: isMobileDevice() ? 10 : null,
+        heading: isMobileDevice() ? randomInt(0, 360) : null,
         speed: null
       },
       timestamp: Date.now()
-    } satisfies MutableGeolocationPosition;
+    };
     return { success: true, position: noisy };
   }
 
@@ -153,9 +154,9 @@ async function addNoise(position: MutableGeolocationPosition) {
       latitude: fixedPos.latitude,
       longitude: fixedPos.longitude,
       accuracy: 10,
-      altitude: null,
-      altitudeAccuracy: null,
-      heading: null,
+      altitude: isMobileDevice() ? randomInt(10, 100) : null,
+      altitudeAccuracy: isMobileDevice() ? 10 : null,
+      heading: isMobileDevice() ? randomInt(0, 360) : null,
       speed: null
     } as MutableGeolocationCoords;
   } else {
