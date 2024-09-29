@@ -9,10 +9,11 @@
     "release": "bumpp -r --all --commit \"release: %s\" --tag \"%s\""
   },
   "devDependencies": {
-    "bumpp": "^9.5.2",
-    "eslint": "^9.10.0",
-    "eslint-config-sukka": "^6.4.3",
-    "eslint-formatter-sukka": "^6.4.3",
+    "@eslint-sukka/react": "^6.6.1",
+    "bumpp": "^9.6.1",
+    "eslint": "^9.11.1",
+    "eslint-config-sukka": "^6.6.1",
+    "eslint-formatter-sukka": "^6.6.1",
     "location-guard-configs": "workspace:*",
     "turbo": "^2.1.2",
     "typescript": "^5.6.2"
