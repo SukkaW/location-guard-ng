@@ -47,9 +47,6 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
     devDependencies:
-      '@rollup/plugin-alias':
-        specifier: ^5.1.1
-        version: 5.1.1(rollup@4.62.2)
       '@rollup/plugin-commonjs':
         specifier: ^29.0.3
         version: 29.0.3(rollup@4.62.2)
@@ -618,15 +615,6 @@ packages:
 
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
-
-  '@rollup/plugin-alias@5.1.1':
-    resolution: {integrity: sha512-PR9zDb+rOzkRb2VD+EuKB7UC41vU5DIwZ5qqCpk0KJudcWAyi8rvYOhS7+L5aZCspw1stTViLgN5v6FF1p5cgQ==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
-    peerDependenciesMeta:
-      rollup:
-        optional: true
 
   '@rollup/plugin-commonjs@29.0.3':
     resolution: {integrity: sha512-ZaOxZceP7SOUW7Lqw5IRVweSQYWaeIPnXIGLiB690EBA3FGJTO40EEr2L5yZplJWsgTCogILRSpcAe7+U0Otdg==}
@@ -2651,10 +2639,6 @@ snapshots:
   '@pkgr/core@0.2.9': {}
 
   '@popperjs/core@2.11.8': {}
-
-  '@rollup/plugin-alias@5.1.1(rollup@4.62.2)':
-    optionalDependencies:
-      rollup: 4.62.2
 
   '@rollup/plugin-commonjs@29.0.3(rollup@4.62.2)':
     dependencies:

@@ -7,7 +7,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import metablock from 'rollup-plugin-userscript-metablock';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import alias from '@rollup/plugin-alias';
 
 import pkgJson from './package.json';
 import process from 'node:process';
@@ -51,16 +50,6 @@ export default defineConfig([
         values: {
           'process.env.NODE_ENV': JSON.stringify('production'),
           'typeof window': JSON.stringify('object')
-        }
-      }),
-      alias({
-        entries: {
-          '@mui/joy': '@mui/joy/modern',
-          '@mui/styled-engine': '@mui/styled-engine/modern',
-          '@mui/system': '@mui/system/modern',
-          '@mui/base': '@mui/base/modern',
-          '@mui/utils': '@mui/utils/modern',
-          '@mui/lab': '@mui/lab/modern'
         }
       }),
       metablock(userScriptMetaBlockConfig)
