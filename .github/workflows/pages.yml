@@ -32,6 +32,7 @@ jobs:
           node-version-file: ".node-version"
           check-latest: true
           cache: "pnpm"
+      - run: pnpm config set --location=global minimumReleaseAge 0
       - run: pnpm install
       - run: pnpm run build
       - uses: actions/configure-pages@v6
