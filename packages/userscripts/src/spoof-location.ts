@@ -2,11 +2,11 @@ import { randomInt } from 'foxts/random-int';
 import { getStoredValueAsync, setStoredValueAsync } from './storage';
 
 import { PlanarLaplace } from './laplace';
-import { klona } from 'klona/lite';
 import type { MutableGeolocationPosition } from 'location-guard-types';
 import { isMobileDevice } from './utils';
 import { getEffectiveLevel } from './site-levels';
 import { debugLog } from './debug';
+import { FakeGeolocationCoordinates, FakeGeolocationPosition } from './position';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const watchPosition = navigator.geolocation.watchPosition;
@@ -118,18 +118,15 @@ async function getNoisyPosition(opt: PositionOptions | undefined): Promise<Noisy
   if (!paused && level === 'fixed') {
     const fixedPos = await getStoredValueAsync('fixedPos');
 
-    const noisy: MutableGeolocationPosition = {
-      coords: {
-        latitude: fixedPos.latitude,
-        longitude: fixedPos.longitude,
-        accuracy: 10,
-        altitude: isMobileDevice() ? randomInt(10, 100) : null,
-        altitudeAccuracy: isMobileDevice() ? 10 : null,
-        heading: isMobileDevice() ? randomInt(0, 360) : null,
-        speed: null
-      },
-      timestamp: Date.now()
-    };
+    const noisy = new FakeGeolocationPosition({
+      latitude: fixedPos.latitude,
+      longitude: fixedPos.longitude,
+      accuracy: 10,
+      altitude: isMobileDevice() ? randomInt(10, 100) : null,
+      altitudeAccuracy: isMobileDevice() ? 10 : null,
+      heading: isMobileDevice() ? randomInt(0, 360) : null,
+      speed: null
+    }, Date.now());
     debugLog('returning fixed position without calling the real geolocation API', noisy);
     return { success: true, position: noisy };
   }
@@ -147,19 +144,36 @@ async function getNoisyPosition(opt: PositionOptions | undefined): Promise<Noisy
           accuracy: position.coords.accuracy,
           timestamp: position.timestamp
         });
-        // clone, modifying/sending the native object returns error
-        const noisy = await addNoise(klona(position));
+        const noisy = await addNoise(clonePosition(position));
         resolve({ success: true, position: noisy });
       },
       function (error) {
         // native error properties live on the prototype and often display as
         // an empty object, so log code/message explicitly
         debugLog('error received from the browser', error, { code: error.code, message: error.message });
-        resolve({ success: false, position: klona(error) }); // clone, sending the native object returns error
+        // the native error is read-only and same-context, safe to hand to the page as-is
+        resolve({ success: false, position: error });
       },
       opt
     ]);
   });
+}
+
+// GeolocationPosition/GeolocationCoordinates expose everything as read-only
+// accessors on the prototype, so generic clone helpers either pass the native
+// object through untouched (mutating it then throws in strict mode) or
+// produce an empty object. Copy field by field into our mutable fake.
+function clonePosition(position: GeolocationPosition): FakeGeolocationPosition {
+  const { coords } = position;
+  return new FakeGeolocationPosition({
+    latitude: coords.latitude,
+    longitude: coords.longitude,
+    accuracy: coords.accuracy,
+    altitude: coords.altitude,
+    altitudeAccuracy: coords.altitudeAccuracy,
+    heading: coords.heading,
+    speed: coords.speed
+  }, position.timestamp);
 }
 
 // gets position, returs noisy version based on the privacy options
@@ -173,7 +187,7 @@ async function addNoise(position: MutableGeolocationPosition) {
   } else if (level === 'fixed') {
     const fixedPos = await getStoredValueAsync('fixedPos');
 
-    position.coords = {
+    position.coords = new FakeGeolocationCoordinates({
       latitude: fixedPos.latitude,
       longitude: fixedPos.longitude,
       accuracy: 10,
@@ -181,7 +195,7 @@ async function addNoise(position: MutableGeolocationPosition) {
       altitudeAccuracy: isMobileDevice() ? 10 : null,
       heading: isMobileDevice() ? randomInt(0, 360) : null,
       speed: null
-    };
+    });
   } else {
     const cachedPos = await getStoredValueAsync('cachedPos');
     const storedEpsilon = await getStoredValueAsync('epsilon');
@@ -189,7 +203,8 @@ async function addNoise(position: MutableGeolocationPosition) {
 
     const cached = cachedPos[level];
     if (cached && (Date.now() - cached.epoch) / 60000 < cached.cacheTime) {
-      position = cached.position;
+      // GM storage strips the prototype, re-wrap so toJSON() etc. survive the cache
+      position = new FakeGeolocationPosition(cached.position.coords, cached.position.timestamp);
       debugLog('using cached noisy position', position);
     } else {
       // add noise

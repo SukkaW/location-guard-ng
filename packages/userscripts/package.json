@@ -26,10 +26,10 @@
   "author": "Sukka <https://skk.moe>",
   "license": "MIT",
   "dependencies": {
+    "@swc/helpers": "^0.5.23",
     "foxact": "^0.3.8",
     "foxts": "^5.8.0",
-    "hntrie": "^1.0.1",
-    "klona": "^2.0.6"
+    "hntrie": "^1.0.1"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.1",
