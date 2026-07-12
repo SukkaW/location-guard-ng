@@ -164,8 +164,9 @@ async function addNoise(position: MutableGeolocationPosition) {
     const storedEpsilon = await getStoredValueAsync('epsilon');
     const levels = await getStoredValueAsync('levels');
 
-    if ('level' in cachedPos && cachedPos[level] && (Date.now() - cachedPos[level].epoch) / 60000 < cachedPos[level].cacheTime) {
-      position = cachedPos[level].position;
+    const cached = cachedPos[level];
+    if (cached && (Date.now() - cached.epoch) / 60000 < cached.cacheTime) {
+      position = cached.position;
       console.log('using cached', position);
     } else {
       // add noise

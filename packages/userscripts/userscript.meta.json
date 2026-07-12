@@ -3,19 +3,11 @@
   "namespace": "https://location-guard-ng.skk.moe",
   "grant": [
     "unsafeWindow",
-    "GM_getValue",
-    "GM_setValue",
     "GM.getValue",
     "GM.setValue",
-    "GM_deleteValue",
-    "GM.deleteValue",
-    "GM.registerMenuCommand",
-    "GM_addValueChangeListener",
-    "GM_removeValueChangeListener",
-    "GM.addValueChangeListener",
-    "GM.removeValueChangeListener"
+    "GM.registerMenuCommand"
   ],
-  "run-at": "document-end",
+  "run-at": "document-start",
   "match": ["*://*/*"],
   "include": ["*://*/*"],
   "updateURL": "https://unpkg.com/location-guard@latest/dist/location-guard-ng.meta.js",

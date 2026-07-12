@@ -34,10 +34,3 @@ export function getStoredValueAsync<T extends keyof StoredValues>(key: T, provid
 export function setStoredValueAsync<T extends keyof StoredValues>(key: T, value: StoredValues[T]): Promise<void> {
   return GM.setValue(key, value as any);
 }
-
-export function getStoredValueSync<T extends keyof StoredValues>(key: T, providedDefaultValue?: StoredValues[T]): StoredValues[T] {
-  return GM_getValue(key, providedDefaultValue ?? DEFAULT_VALUE[key]);
-}
-export function setStoredValueSync<T extends keyof StoredValues>(key: T, value: StoredValues[T]): void {
-  return GM_setValue(key, value as any);
-}
