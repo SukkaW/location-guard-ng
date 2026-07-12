@@ -7,7 +7,3 @@ export function isMobileDevice() {
   isMobile = pattern.test(window.navigator.userAgent);
   return isMobile;
 }
-
-export function randomInt(from: number, to: number): number {
-  return Math.floor(Math.random() * (to - from + 1)) + from;
-}

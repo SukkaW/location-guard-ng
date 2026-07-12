@@ -1,9 +1,10 @@
+import { randomInt } from 'foxts/random-int';
 import { getStoredValueAsync, setStoredValueAsync } from './storage';
 
 import { PlanarLaplace } from './laplace';
 import { klona } from 'klona/lite';
 import type { MutableGeolocationPosition } from 'location-guard-types';
-import { isMobileDevice, randomInt } from './utils';
+import { isMobileDevice } from './utils';
 import { getEffectiveLevel } from './site-levels';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
