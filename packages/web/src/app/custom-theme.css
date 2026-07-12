@@ -1,0 +1,81 @@
+/*
+ * Neutral graphite gray scale for dark mode, replacing Radix's stock "slate".
+ * accentColor="gray" on <Theme> aliases --accent-* to this same scale, so this
+ * also removes the default blue accent in dark mode without a separate custom color.
+ */
+.dark,
+.dark-theme {
+  --gray-1: #111213;
+  --gray-2: #19191a;
+  --gray-3: #222324;
+  --gray-4: #292a2b;
+  --gray-5: #303133;
+  --gray-6: #393a3d;
+  --gray-7: #46484b;
+  --gray-8: #5d6064;
+  --gray-9: #6b6e73;
+  --gray-10: #797c80;
+  --gray-11: #b2b4b8;
+  --gray-12: #edeeef;
+
+  --gray-a1: #00000000;
+  --gray-a2: #f4d9da09;
+  --gray-a3: #f6f7f813;
+  --gray-a4: #fdfeff1a;
+  --gray-a5: #f3f4fd23;
+  --gray-a6: #eff0fc2e;
+  --gray-a7: #eff4fe3d;
+  --gray-a8: #eef4fe58;
+  --gray-a9: #eef3ff68;
+  --gray-a10: #f2f7ff76;
+  --gray-a11: #f7f9feb3;
+  --gray-a12: #fdfeffee;
+
+  --gray-contrast: #ffffff;
+  --gray-surface: rgba(0, 0, 0, 0.05);
+  --gray-indicator: #6b6e73;
+  --gray-track: #6b6e73;
+}
+
+@supports (color: color(display-p3 1 1 1)) {
+  @media (color-gamut: p3) {
+    .dark,
+    .dark-theme {
+      --gray-1: oklch(18.2% 0.002 258.3);
+      --gray-2: oklch(21.4% 0.0019 258.3);
+      --gray-3: oklch(25.4% 0.0025 258.3);
+      --gray-4: oklch(28.4% 0.0035 258.3);
+      --gray-5: oklch(31.3% 0.0041 258.3);
+      --gray-6: oklch(34.9% 0.0046 258.3);
+      --gray-7: oklch(40.2% 0.0056 258.3);
+      --gray-8: oklch(48.8% 0.0073 258.3);
+      --gray-9: oklch(53.8% 0.0077 258.3);
+      --gray-10: oklch(58.5% 0.0076 258.3);
+      --gray-11: oklch(77% 0.0064 258.3);
+      --gray-12: oklch(94.9% 0.0012 258.3);
+
+      --gray-a1: color(display-p3 0 0 0 / 0);
+      --gray-a2: color(display-p3 0.9922 0.8784 0.8824 / 0.034);
+      --gray-a3: color(display-p3 0.9804 0.9843 0.9882 / 0.073);
+      --gray-a4: color(display-p3 0.9922 0.9961 1 / 0.102);
+      --gray-a5: color(display-p3 0.9608 0.9647 1 / 0.136);
+      --gray-a6: color(display-p3 0.949 0.9529 1 / 0.178);
+      --gray-a7: color(display-p3 0.9412 0.9608 1 / 0.238);
+      --gray-a8: color(display-p3 0.9451 0.9608 1 / 0.344);
+      --gray-a9: color(display-p3 0.9451 0.9569 1 / 0.407);
+      --gray-a10: color(display-p3 0.9608 0.9686 1 / 0.462);
+      --gray-a11: color(display-p3 0.9686 0.9804 0.9961 / 0.7);
+      --gray-a12: color(display-p3 0.9922 0.9961 1 / 0.933);
+
+      --gray-contrast: #ffffff;
+      --gray-surface: color(display-p3 0 0 0 / 5%);
+      --gray-indicator: oklch(53.8% 0.0077 258.3);
+      --gray-track: oklch(53.8% 0.0077 258.3);
+    }
+  }
+}
+
+.dark,
+.dark-theme {
+  --color-background: #111213;
+}

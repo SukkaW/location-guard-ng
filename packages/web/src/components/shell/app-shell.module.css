@@ -1,0 +1,150 @@
+.shell {
+  display: flex;
+  height: 100%;
+}
+
+.sidebar {
+  width: 252px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-right: 1px solid var(--gray-a5);
+  background-color: var(--color-panel-solid);
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--gray-a5);
+}
+
+.logoMark {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-3);
+  background-color: var(--accent-9);
+  color: var(--accent-contrast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 12px 8px;
+  overflow-y: auto;
+}
+
+.sidebarFooter {
+  padding: 10px 12px;
+  border-top: 1px solid var(--gray-a5);
+}
+
+.navSection {
+  padding: 6px 4px 0;
+}
+
+.navSectionLabel {
+  display: block;
+  padding: 10px 8px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-3);
+  color: var(--gray-12);
+  font-size: var(--font-size-2);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.navItem:hover {
+  background-color: var(--gray-a3);
+}
+
+.navItemActive,
+.navItemActive:hover {
+  background-color: var(--accent-a4);
+  color: var(--accent-11);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--gray-a5);
+  background-color: var(--color-background);
+}
+
+.menuButton {
+  display: none;
+}
+
+.content {
+  padding: 28px;
+  max-width: 880px;
+  width: 100%;
+  min-width: 0;
+}
+
+.overlay {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-5);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .menuButton {
+    display: inline-flex;
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background-color: var(--black-a8);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .overlayVisible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

@@ -1,9 +1,11 @@
 name: Deploy to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ["master"]
+    branches:
+      - master
+    paths:
+      - packages/web/**
   workflow_dispatch:
 
 permissions:
@@ -23,10 +25,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+          check-latest: true
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm run build
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
-          # Upload entire repository
-          path: "./web"
+          # Next.js static export output (`output: 'export'` in packages/web/next.config.js)
+          path: "./packages/web/out"
       - uses: actions/deploy-pages@v5
         id: deployment

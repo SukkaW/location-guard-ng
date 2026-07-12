@@ -11,6 +11,7 @@ on:
       - "**/*.gitignore"
       - .editorconfig
       - docs/**
+      - packages/web/**
   pull_request: null
 jobs:
   publish:
