@@ -24,7 +24,8 @@ export const DEFAULT_VALUE: StoredValues = {
       cacheTime: 60
     }
   },
-  siteLevels: ''
+  siteLevels: '',
+  debug: false
 };
 
 export function getStoredValueAsync<T extends keyof StoredValues>(key: T, providedDefaultValue?: StoredValues[T]): Promise<StoredValues[T]> {

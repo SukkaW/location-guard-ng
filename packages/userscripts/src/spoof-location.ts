@@ -6,6 +6,7 @@ import { klona } from 'klona/lite';
 import type { MutableGeolocationPosition } from 'location-guard-types';
 import { isMobileDevice } from './utils';
 import { getEffectiveLevel } from './site-levels';
+import { debugLog } from './debug';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const watchPosition = navigator.geolocation.watchPosition;
@@ -17,12 +18,16 @@ const clearWatch = navigator.geolocation.clearWatch;
 async function callGeoCb(cb: PositionCallback, pos: MutableGeolocationPosition, checkAllowed: boolean): Promise<void>;
 async function callGeoCb(cb: PositionErrorCallback | null | undefined, error: GeolocationPositionError, checkAllowed: boolean): Promise<void>;
 async function callGeoCb(cb: PositionCallback | PositionErrorCallback | null | undefined, arg: any, checkAllowed: boolean): Promise<void> {
-  if (
-    cb
-    && (!checkAllowed || await isWatchAllowed())
-  ) {
-    cb(arg);
+  if (!cb) {
+    debugLog('page provided no callback, dropping', arg);
+    return;
   }
+  if (checkAllowed && !(await isWatchAllowed())) {
+    debugLog('real watch callback suppressed (privacy protection became active after the watch was installed)', arg);
+    return;
+  }
+  debugLog('invoking page callback with', arg);
+  cb(arg);
 }
 
 export function spoofLocation(): void {
@@ -33,6 +38,7 @@ export function spoofLocation(): void {
   navigator.geolocation.getCurrentPosition = async function (positionCb, positionOnError, options) {
     // call getNoisyPosition on the content-script
     // call cb1 on success, cb2 on failure
+    debugLog('page called getCurrentPosition', { options });
     const res = await getNoisyPosition(options);
     if (res.success) {
       callGeoCb(positionCb, res.position, false);
@@ -50,9 +56,12 @@ export function spoofLocation(): void {
     // asynchronously. So we create our own handler, and we'll associate it with the real one later.
     const handler = Math.floor(Math.random() * 10000);
 
+    debugLog('page called watchPosition', { options, handler });
+
     (async () => {
       if (await isWatchAllowed()) {
         // We're allowed to call the real watchPosition (note: remember the handler)
+        debugLog('watchPosition: paused or level is "real", installing a real watch for handler', handler);
         handlers.set(
           handler,
           watchPosition.apply(navigator.geolocation, [
@@ -63,6 +72,7 @@ export function spoofLocation(): void {
         );
       } else {
         // Not allowed, we don't install a real watch, just return the position once
+        debugLog('watchPosition: privacy protection active (or in iframe), falling back to a single getCurrentPosition');
         this.getCurrentPosition(cb1, cb2, options);
       }
     })();
@@ -70,6 +80,7 @@ export function spoofLocation(): void {
   };
 
   navigator.geolocation.clearWatch = function (handler) {
+    debugLog('page called clearWatch', { handler, hasRealWatch: handlers.has(handler) });
     if (handlers.has(handler)) {
       clearWatch.apply(navigator.geolocation, [handlers.get(handler)!]);
       handlers.delete(handler);
@@ -102,6 +113,8 @@ async function getNoisyPosition(opt: PositionOptions | undefined): Promise<Noisy
   const level = await getEffectiveLevel(window.location.hostname);
   const paused = await getStoredValueAsync('paused');
 
+  debugLog('getNoisyPosition', { level, paused, hostname: window.location.hostname });
+
   if (!paused && level === 'fixed') {
     const fixedPos = await getStoredValueAsync('fixedPos');
 
@@ -117,6 +130,7 @@ async function getNoisyPosition(opt: PositionOptions | undefined): Promise<Noisy
       },
       timestamp: Date.now()
     };
+    debugLog('returning fixed position without calling the real geolocation API', noisy);
     return { success: true, position: noisy };
   }
 
@@ -124,13 +138,23 @@ async function getNoisyPosition(opt: PositionOptions | undefined): Promise<Noisy
     // we call getCurrentPosition here in the content script, instead of
     // inside the page, because the content-script/page communication is not secure
     //
+    debugLog('calling the real getCurrentPosition');
     getCurrentPosition.apply(navigator.geolocation, [
       async function (position) {
+        debugLog('real position received from the browser', position, {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          timestamp: position.timestamp
+        });
         // clone, modifying/sending the native object returns error
         const noisy = await addNoise(klona(position));
         resolve({ success: true, position: noisy });
       },
       function (error) {
+        // native error properties live on the prototype and often display as
+        // an empty object, so log code/message explicitly
+        debugLog('error received from the browser', error, { code: error.code, message: error.message });
         resolve({ success: false, position: klona(error) }); // clone, sending the native object returns error
       },
       opt
@@ -166,7 +190,7 @@ async function addNoise(position: MutableGeolocationPosition) {
     const cached = cachedPos[level];
     if (cached && (Date.now() - cached.epoch) / 60000 < cached.cacheTime) {
       position = cached.position;
-      console.log('using cached', position);
+      debugLog('using cached noisy position', position);
     } else {
       // add noise
       const epsilon = storedEpsilon / levels[level].radius;
@@ -194,7 +218,7 @@ async function addNoise(position: MutableGeolocationPosition) {
       cachedPos[level] = { epoch: Date.now(), position, cacheTime: levels[level].cacheTime };
       await setStoredValueAsync('cachedPos', cachedPos);
 
-      console.log('noisy coords', position.coords);
+      debugLog('noisy position generated and cached', position.coords);
     }
   }
 

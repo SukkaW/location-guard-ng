@@ -1,69 +1,81 @@
 import { getEffectiveLevel } from '../site-levels';
 import { openSiteLevelPicker } from './site-level-picker';
+import { gm } from '../gm';
+import { isDebugEnabled, toggleDebugEnabled } from '../debug';
 
-// None of these are part of the GM4 spec / @types/greasemonkey, so they are
-// feature-detected at runtime. registerMenuCommand's options object
-// (Tampermonkey 4.20+) lets us reuse the previous id so a caption update
-// replaces the entry in place, keeping its menu position; managers that
-// ignore it get the unregister + re-register fallback below.
-// (method-shorthand signatures on purpose: bivariance keeps the GM object
-// assignable to this partial view)
-interface GMExtra {
-  // third param is a union because GM4 typings declare it as accessKey?: string;
-  // the union + method-shorthand bivariance keeps GM assignable to this view
-  registerMenuCommand(caption: string, onClick: () => void, optionsOrAccessKey?: string | { id: unknown }): unknown,
-  unregisterMenuCommand(id: unknown): unknown,
-  addValueChangeListener(name: string, cb: (name: string, oldValue: unknown, newValue: unknown, remote: boolean) => void): unknown
+function createUpdatableMenuCommand(getCaption: () => Promise<string> | string, onClick: () => void): () => Promise<void> {
+  let menuId: unknown;
+
+  return async function refresh(): Promise<void> {
+    if (typeof gm.registerMenuCommand !== 'function') return;
+
+    const prevId = menuId;
+    // A caption update needs the old entry gone: either the manager honors id
+    // reuse (replaces in place), or we unregister the old entry afterwards.
+    // When the manager gave us no id (sentinel true) or has no unregister,
+    // keep the stale caption instead of stacking duplicate entries.
+    if (prevId === true) return;
+    if (prevId !== undefined && typeof gm.unregisterMenuCommand !== 'function') return;
+
+    const newId = await gm.registerMenuCommand(
+      await getCaption(),
+      onClick,
+      prevId === undefined ? undefined : { id: prevId }
+    // the GM4 spec types registerMenuCommand as void; a manager that returns
+    // no id still registered the command, remember that with a sentinel
+    ) ?? true;
+
+    if (prevId !== undefined && newId !== prevId && typeof gm.unregisterMenuCommand === 'function') {
+      // the manager ignored the reused id and created a fresh entry, drop the old one
+      await gm.unregisterMenuCommand(prevId);
+    }
+
+    menuId = newId;
+  };
 }
 
-const gm: Partial<GMExtra> = GM;
-
-let siteMenuId: unknown;
-
-export async function registerSiteLevelMenuCommand(): Promise<void> {
-  if (typeof gm.registerMenuCommand !== 'function') return;
-  const { hostname } = window.location;
-  if (!hostname) return;
-
-  const prevId = siteMenuId;
-  // A caption update needs the old entry gone: either the manager honors id
-  // reuse (replaces in place), or we unregister the old entry afterwards.
-  // When the manager gave us no id (sentinel true) or has no unregister,
-  // keep the stale caption instead of stacking duplicate entries.
-  if (prevId === true) return;
-  if (prevId !== undefined && typeof gm.unregisterMenuCommand !== 'function') return;
-
-  const level = await getEffectiveLevel(hostname);
-  const newId = await gm.registerMenuCommand(
-    `Set level for this site (currently: ${level})`,
-    () => {
-      void openSiteLevelPicker(() => {
-        void registerSiteLevelMenuCommand();
-      });
-    },
-    prevId === undefined ? undefined : { id: prevId }
-  // the GM4 spec types registerMenuCommand as void; a manager that returns
-  // no id still registered the command, remember that with a sentinel
-  ) ?? true;
-
-  if (prevId !== undefined && newId !== prevId && typeof gm.unregisterMenuCommand === 'function') {
-    // the manager ignored the reused id and created a fresh entry, drop the old one
-    await gm.unregisterMenuCommand(prevId);
+const refreshSiteLevelMenu = createUpdatableMenuCommand(
+  async () => `Set level for this site (currently: ${await getEffectiveLevel(window.location.hostname)})`,
+  () => {
+    void openSiteLevelPicker(() => {
+      registerSiteLevelMenuCommand();
+    });
   }
+);
 
-  siteMenuId = newId;
+export function registerSiteLevelMenuCommand(): void {
+  if (!window.location.hostname) return;
+  void refreshSiteLevelMenu();
 }
 
-/** Refresh the menu caption when another tab (e.g. the config page) changes relevant settings */
-export function refreshSiteLevelMenuOnRemoteChange(): void {
+const refreshDebugMenu = createUpdatableMenuCommand(
+  () => (isDebugEnabled() ? 'Disable debug logging' : 'Enable debug logging'),
+  () => {
+    void toggleDebugEnabled().then(refreshDebugMenu);
+  }
+);
+
+export function registerDebugMenuCommand(): void {
+  void refreshDebugMenu();
+}
+
+/** Refresh menu captions when another tab (e.g. the config page) changes relevant settings */
+export function refreshMenusOnRemoteChange(): void {
   if (typeof gm.addValueChangeListener !== 'function') return;
 
   for (const key of ['siteLevels', 'defaultLevel']) {
     gm.addValueChangeListener(key, (_name, _oldValue, _newValue, remote) => {
       // local changes are already handled by the picker's onSaved callback
       if (remote) {
-        void registerSiteLevelMenuCommand();
+        registerSiteLevelMenuCommand();
       }
     });
   }
+
+  gm.addValueChangeListener('debug', (_name, _oldValue, _newValue, remote) => {
+    // local toggles already refresh the caption in the menu command itself
+    if (remote) {
+      registerDebugMenuCommand();
+    }
+  });
 }

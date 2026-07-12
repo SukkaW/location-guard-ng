@@ -36,7 +36,9 @@ export interface StoredValues {
   paused: boolean,
   fixedPos: Position,
   /** serialized hntrie (HostnameTrie<Level>) of per-site level overrides, '' when empty */
-  siteLevels: string
+  siteLevels: string,
+  /** verbose console logging of the geolocation spoofing pipeline */
+  debug: boolean
 }
 
 export interface SiteLevelEntry {

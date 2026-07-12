@@ -1,12 +1,15 @@
 import 'typed-query-selector';
 import { spoofLocation } from './spoof-location';
 import { renderConfigUI } from './ui';
-import { registerSiteLevelMenuCommand, refreshSiteLevelMenuOnRemoteChange } from './ui/menu';
+import { registerSiteLevelMenuCommand, registerDebugMenuCommand, refreshMenusOnRemoteChange } from './ui/menu';
+import { initDebug } from './debug';
 
 spoofLocation();
 
 registerSiteLevelMenuCommand();
-refreshSiteLevelMenuOnRemoteChange();
+// the debug menu caption needs the cached flag, so register after init
+void initDebug().then(registerDebugMenuCommand);
+refreshMenusOnRemoteChange();
 
 if ('registerMenuCommand' in GM && typeof GM.registerMenuCommand === 'function') {
   GM.registerMenuCommand(
