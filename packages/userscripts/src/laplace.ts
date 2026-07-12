@@ -45,10 +45,11 @@ export const PlanarLaplace: PlanarLaplaceLike = {
   /** LamberW function on branch -1 (http://en.wikipedia.org/wiki/Lambert_W_function) */
   LambertW(this: void, x: number) {
     // min_diff decides when the while loop should stop
-    const min_diff = 1e-10;
     if (x === -1 / Math.E) {
       return -1;
     }
+
+    const min_diff = 1e-10;
 
     if (x < 0 && x > -1 / Math.E) {
       let q = Math.log(-x);
@@ -60,9 +61,8 @@ export const PlanarLaplace: PlanarLaplaceLike = {
       // This line decides the precision of the float number that would be returned
       return (Math.round(1_000_000 * q) / 1_000_000);
     }
-    if (x === 0) { return 0; }
-    // TODO why do you need this if branch?
 
+    // if (x === 0) { return 0; } // why do you need this if branch?
     return 0;
   },
 
@@ -149,7 +149,6 @@ export const PlanarLaplace: PlanarLaplaceLike = {
 
   /** This function generates the position of a point with Laplacian noise */
   addNoise(this: void, epsilon: number, pos: Position): Position {
-    // TODO: use latlon.js
     return PlanarLaplace.addPolarNoise(epsilon, pos);
   },
 
