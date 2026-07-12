@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { defineConfig } from 'rollup';
 
 import { swc, defineRollupSwcOption } from 'rollup-plugin-swc3';

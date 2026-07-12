@@ -1,4 +1,7 @@
+/// <reference types="greasemonkey" />
+
 import 'typed-query-selector';
+
 import { spoofLocation } from './spoof-location';
 import { renderConfigUI } from './ui';
 import { registerSiteLevelMenuCommand, registerDebugMenuCommand, refreshMenusOnRemoteChange } from './ui/menu';

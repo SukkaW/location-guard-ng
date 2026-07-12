@@ -1,3 +1,5 @@
+/// <reference types="greasemonkey" />
+
 // None of these are part of the GM4 spec / @types/greasemonkey, so they are
 // feature-detected at runtime. registerMenuCommand's options object
 // (Tampermonkey 4.20+) lets us reuse the previous id so a caption update
