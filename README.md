@@ -22,8 +22,8 @@ https://location-guard-ng.skk.moe/options
 
 - [ ] New configuration UI
   - The current configuration UI is back ported directly from the original browser extension. Need to rewrite in React and JoyUI.
-- [ ] Per domain configuration
-  - The original browser extension allows to set different privacy levels for different domains. This feature is not yet implemented in the UserScript version.
+- [x] Per domain configuration
+  - The original browser extension allows to set different privacy levels for different domains. ~~This feature is not yet implemented in the UserScript version.~~ The feature is implemented in a way that is a lot better than the original browser extension: Powered by [hntrie](https://github.com/SukkaW/hntrie), Location Guard Ng now suports wildcard domains level configuration support.
 
 ## How to build
 
