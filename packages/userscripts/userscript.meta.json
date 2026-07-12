@@ -5,7 +5,9 @@
     "unsafeWindow",
     "GM.getValue",
     "GM.setValue",
-    "GM.registerMenuCommand"
+    "GM.registerMenuCommand",
+    "GM.unregisterMenuCommand",
+    "GM.addValueChangeListener"
   ],
   "run-at": "document-start",
   "match": ["*://*/*"],

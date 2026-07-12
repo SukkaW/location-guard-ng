@@ -1,20 +1,14 @@
 import 'typed-query-selector';
 import { spoofLocation } from './spoof-location';
 import { renderConfigUI } from './ui';
-import { openSiteLevelPicker } from './ui/site-level-picker';
+import { registerSiteLevelMenuCommand, refreshSiteLevelMenuOnRemoteChange } from './ui/menu';
 
 spoofLocation();
 
-if ('registerMenuCommand' in GM && typeof GM.registerMenuCommand === 'function') {
-  if (window.location.hostname) {
-    GM.registerMenuCommand(
-      'Set level for this site',
-      () => {
-        void openSiteLevelPicker();
-      }
-    );
-  }
+registerSiteLevelMenuCommand();
+refreshSiteLevelMenuOnRemoteChange();
 
+if ('registerMenuCommand' in GM && typeof GM.registerMenuCommand === 'function') {
   GM.registerMenuCommand(
     'Configuration',
     () => {

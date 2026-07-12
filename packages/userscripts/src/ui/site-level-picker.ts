@@ -7,7 +7,7 @@ function formatRadius(meters: number): string {
   return meters >= 1000 ? `${Number((meters / 1000).toFixed(2))} km` : `${meters} m`;
 }
 
-export async function openSiteLevelPicker(): Promise<void> {
+export async function openSiteLevelPicker(onSaved?: () => void): Promise<void> {
   const { hostname } = window.location;
   if (!hostname) return;
 
@@ -100,7 +100,8 @@ export async function openSiteLevelPicker(): Promise<void> {
     if (dialog.returnValue === 'save') {
       const checked = form.querySelector('input[name="level"]:checked');
       const level = checked?.value ?? '';
-      void setSiteLevel(hostname, level === '' ? null : level as Level, subdomainCheckbox.checked);
+      void setSiteLevel(hostname, level === '' ? null : level as Level, subdomainCheckbox.checked)
+        .then(() => onSaved?.());
     }
     host.remove();
   });
