@@ -9,14 +9,14 @@
     "release": "bumpp -r --all --commit \"release: %s\" --tag \"%s\""
   },
   "devDependencies": {
-    "@eslint-sukka/react": "^8.9.2",
+    "@eslint-sukka/react": "^8.13.5",
     "bumpp": "^9.11.1",
-    "eslint": "^10.2.0",
-    "eslint-config-sukka": "^8.9.2",
-    "eslint-formatter-sukka": "^8.9.2",
+    "eslint": "^10.7.0",
+    "eslint-config-sukka": "^8.13.5",
+    "eslint-formatter-sukka": "^8.13.5",
     "location-guard-configs": "workspace:*",
-    "turbo": "^2.9.5",
+    "turbo": "^2.10.4",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.34.5"
 }

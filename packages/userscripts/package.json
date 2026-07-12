@@ -26,22 +26,22 @@
   "author": "Sukka <https://skk.moe>",
   "license": "MIT",
   "dependencies": {
-    "foxact": "^0.3.0",
+    "foxact": "^0.3.8",
     "klona": "^2.0.6"
   },
   "devDependencies": {
-    "@rollup/plugin-alias": "^6.0.0",
-    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-alias": "^5.1.1",
+    "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-replace": "^6.0.3",
-    "@swc/core": "^1.15.24",
+    "@swc/core": "^1.15.43",
     "@types/greasemonkey": "^4.0.7",
     "@types/greasemonkey3": "npm:@types/greasemonkey@^3.0.3",
-    "@types/node": "^22.19.17",
+    "@types/node": "^22.20.1",
     "location-guard-types": "workspace:*",
-    "rollup": "^4.60.1",
+    "rollup": "^4.62.2",
     "rollup-plugin-swc3": "^0.12.1",
     "rollup-plugin-userscript-metablock": "^0.4.3",
-    "typed-query-selector": "^2.12.1"
+    "typed-query-selector": "^2.12.2"
   }
 }
