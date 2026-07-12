@@ -3,22 +3,19 @@ import { getEffectiveLevel, getSiteOverride, setSiteLevel } from '../site-levels
 import { getStoredValueAsync } from '../storage';
 import { tagged as css } from 'foxts/tagged';
 
-const LEVELS: Array<[Level, string]> = [
-  ['fixed', 'Use fixed location'],
-  ['high', 'High'],
-  ['medium', 'Medium'],
-  ['low', 'Low'],
-  ['real', 'Use real location']
-];
+function formatRadius(meters: number): string {
+  return meters >= 1000 ? `${Number((meters / 1000).toFixed(2))} km` : `${meters} m`;
+}
 
 export async function openSiteLevelPicker(): Promise<void> {
   const { hostname } = window.location;
   if (!hostname) return;
 
-  const [defaultLevel, effectiveLevel, override] = await Promise.all([
+  const [defaultLevel, effectiveLevel, override, levels] = await Promise.all([
     getStoredValueAsync('defaultLevel'),
     getEffectiveLevel(hostname),
-    getSiteOverride(hostname)
+    getSiteOverride(hostname),
+    getStoredValueAsync('levels')
   ]);
 
   const host = document.createElement('div');
@@ -33,6 +30,7 @@ export async function openSiteLevelPicker(): Promise<void> {
     }
     label { display: block; }
     fieldset { margin: 0 0 8px; border: none; padding: 0; }
+    .scope-hint { margin: 0 0 0 1.6em; opacity: 0.7; font-size: 0.92em; }
     .buttons { text-align: right; }
     .buttons button { margin-left: 8px; }
   `;
@@ -50,7 +48,11 @@ export async function openSiteLevelPicker(): Promise<void> {
   const selectedLevel = override ? override.level : '';
   const levelOptions: Array<[Level | '', string]> = [
     ['', `Use default (${defaultLevel})`],
-    ...LEVELS
+    ['fixed', 'Use fixed location'],
+    ['high', `High (±${formatRadius(levels.high.radius)} noise)`],
+    ['medium', `Medium (±${formatRadius(levels.medium.radius)} noise)`],
+    ['low', `Low (±${formatRadius(levels.low.radius)} noise)`],
+    ['real', 'Use real location']
   ];
   for (const [value, text] of levelOptions) {
     const label = document.createElement('label');
@@ -69,7 +71,16 @@ export async function openSiteLevelPicker(): Promise<void> {
   subdomainCheckbox.type = 'checkbox';
   subdomainCheckbox.checked = override ? override.includeSubdomain : true;
   subdomainLabel.append(subdomainCheckbox, ' Include all subdomains');
-  subdomainFieldset.append(subdomainLabel);
+  const scopeHint = document.createElement('p');
+  scopeHint.className = 'scope-hint';
+  const updateScopeHint = () => {
+    scopeHint.textContent = subdomainCheckbox.checked
+      ? `applies to *.${hostname} + ${hostname}`
+      : `applies to ${hostname} exact only`;
+  };
+  updateScopeHint();
+  subdomainCheckbox.addEventListener('change', updateScopeHint);
+  subdomainFieldset.append(subdomainLabel, scopeHint);
 
   const buttons = document.createElement('div');
   buttons.className = 'buttons';
