@@ -1,6 +1,7 @@
 import { PlanarLaplace } from '../laplace';
 import type { $LocationGuard, StoredValues } from 'location-guard-types';
 import { DEFAULT_VALUE, getStoredValueAsync, setStoredValueAsync } from '../storage';
+import { dumpSiteLevels, setSiteLevel } from '../site-levels';
 
 export async function renderConfigUI() {
   const $locationGuard: $LocationGuard = {
@@ -15,7 +16,9 @@ export async function renderConfigUI() {
     async resetConfig() {
       const keys = Object.keys(DEFAULT_VALUE) as Array<keyof StoredValues>;
       await Promise.all(keys.map(key => setStoredValueAsync(key, DEFAULT_VALUE[key])));
-    }
+    },
+    dumpSiteLevels,
+    setSiteLevel
   };
 
   Object.defineProperty(unsafeWindow, '$locationGuard', {

@@ -37,6 +37,12 @@ importers:
       foxact:
         specifier: ^0.3.8
         version: 0.3.8(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      foxts:
+        specifier: ^5.8.0
+        version: 5.8.0
+      hntrie:
+        specifier: ^1.0.1
+        version: 1.0.1
       klona:
         specifier: ^2.0.6
         version: 2.0.6
@@ -1588,6 +1594,9 @@ packages:
 
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
+
+  hntrie@1.0.1:
+    resolution: {integrity: sha512-k3OIFupPUGL1WrAiZ0Xa5on/vE/MKlub7ZQtEH0AfzfskMqq4/H6xgSqMeCXzVgNDWruP/Ff+9O5mHRzL4XZyg==}
 
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
@@ -3609,6 +3618,10 @@ snapshots:
   hermes-parser@0.25.1:
     dependencies:
       hermes-estree: 0.25.1
+
+  hntrie@1.0.1:
+    dependencies:
+      foxts: 5.8.0
 
   hoist-non-react-statics@3.3.2:
     dependencies:

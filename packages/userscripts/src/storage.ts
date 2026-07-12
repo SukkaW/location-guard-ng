@@ -23,8 +23,8 @@ export const DEFAULT_VALUE: StoredValues = {
       radius: 2000,
       cacheTime: 60
     }
-  }
-  // domainLevel: {} // TODO: per domain level
+  },
+  siteLevels: ''
 };
 
 export function getStoredValueAsync<T extends keyof StoredValues>(key: T, providedDefaultValue?: StoredValues[T]): Promise<StoredValues[T]> {

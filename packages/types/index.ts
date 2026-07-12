@@ -34,7 +34,15 @@ export interface StoredValues {
     position: MutableGeolocationPosition
   }>>,
   paused: boolean,
-  fixedPos: Position
+  fixedPos: Position,
+  /** serialized hntrie (HostnameTrie<Level>) of per-site level overrides, '' when empty */
+  siteLevels: string
+}
+
+export interface SiteLevelEntry {
+  hostname: string,
+  includeSubdomain: boolean,
+  level: Level
 }
 
 declare global {
@@ -74,5 +82,7 @@ export interface $LocationGuard {
   emptyCachedPos: () => Promise<void>,
   setValue<K extends keyof StoredValues>(key: K, value: StoredValues[K]): Promise<void>,
   getValue<K extends keyof StoredValues>(key: K): Promise<StoredValues[K]>,
-  resetConfig: () => Promise<void>
+  resetConfig: () => Promise<void>,
+  dumpSiteLevels: () => Promise<SiteLevelEntry[]>,
+  setSiteLevel: (hostname: string, level: Level | null, includeSubdomain: boolean) => Promise<void>
 }

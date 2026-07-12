@@ -4,6 +4,7 @@ import { PlanarLaplace } from './laplace';
 import { klona } from 'klona/lite';
 import type { MutableGeolocationPosition } from 'location-guard-types';
 import { isMobileDevice, randomInt } from './utils';
+import { getEffectiveLevel } from './site-levels';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
 const watchPosition = navigator.geolocation.watchPosition;
@@ -80,7 +81,7 @@ const inFrame = window !== window.top;
 async function isWatchAllowed() {
   // Returns true if using the real watch is allowed. Only if paused or level == 'real'.
   // Also don't allow in iframes (to simplify the code).
-  const level = await getStoredValueAsync('defaultLevel'); // TODO: per domain level
+  const level = await getEffectiveLevel(window.location.hostname);
   const paused = await getStoredValueAsync('paused');
 
   return !inFrame && (paused || level === 'real');
@@ -97,9 +98,7 @@ interface NoisyPositionResultFailure {
 }
 
 async function getNoisyPosition(opt: PositionOptions | undefined): Promise<NoisyPositionResultSuccess | NoisyPositionResultFailure> {
-  // const domain = window.location.hostname;
-  // TODO: per domain level
-  const level = await getStoredValueAsync('defaultLevel');
+  const level = await getEffectiveLevel(window.location.hostname);
   const paused = await getStoredValueAsync('paused');
 
   if (!paused && level === 'fixed') {
@@ -142,8 +141,7 @@ async function getNoisyPosition(opt: PositionOptions | undefined): Promise<Noisy
 //
 async function addNoise(position: MutableGeolocationPosition) {
   const paused = await getStoredValueAsync('paused');
-  // TODO: per domain level
-  const level = await getStoredValueAsync('defaultLevel');
+  const level = await getEffectiveLevel(window.location.hostname);
 
   if (paused || level === 'real') {
     // do nothing, use real location
