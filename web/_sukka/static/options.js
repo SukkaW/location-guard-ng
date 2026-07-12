@@ -34,8 +34,8 @@ let sliderRadius, sliderCacheTime;
 
 // default pos
 let currentPos = {
-  latitude: 48.860_141_066_724_41,
-  longitude: 2.356_910_705_566_406
+  latitude: 48.86014106672441,
+  longitude: 2.356910705566406
 };
 
 // slider wrapper class, cause sGlide interface sucks

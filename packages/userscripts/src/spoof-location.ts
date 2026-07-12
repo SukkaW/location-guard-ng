@@ -2,7 +2,7 @@ import { getStoredValueAsync, setStoredValueAsync } from './storage';
 
 import { PlanarLaplace } from './laplace';
 import { klona } from 'klona/lite';
-import type { MutableGeolocationCoords, MutableGeolocationPosition } from 'location-guard-types';
+import type { MutableGeolocationPosition } from 'location-guard-types';
 import { isMobileDevice, randomInt } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/unbound-method -- cache original function and will be called with proper this
@@ -127,7 +127,7 @@ async function getNoisyPosition(opt: PositionOptions | undefined): Promise<Noisy
     getCurrentPosition.apply(navigator.geolocation, [
       async function (position) {
         // clone, modifying/sending the native object returns error
-        const noisy = await addNoise(klona(position) as MutableGeolocationPosition);
+        const noisy = await addNoise(klona(position));
         resolve({ success: true, position: noisy });
       },
       function (error) {
@@ -158,7 +158,7 @@ async function addNoise(position: MutableGeolocationPosition) {
       altitudeAccuracy: isMobileDevice() ? 10 : null,
       heading: isMobileDevice() ? randomInt(0, 360) : null,
       speed: null
-    } as MutableGeolocationCoords;
+    };
   } else {
     const cachedPos = await getStoredValueAsync('cachedPos');
     const storedEpsilon = await getStoredValueAsync('epsilon');

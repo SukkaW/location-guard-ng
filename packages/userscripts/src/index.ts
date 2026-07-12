@@ -2,7 +2,7 @@ import 'typed-query-selector';
 import { spoofLocation } from './spoof-location';
 import { renderConfigUI } from './ui';
 
-(() => {
+{
   spoofLocation();
 
   if ('registerMenuCommand' in GM && typeof GM.registerMenuCommand === 'function') {
@@ -30,4 +30,4 @@ import { renderConfigUI } from './ui';
       renderConfigUI();
     }
   }
-})();
+}
