@@ -1,3 +1,8 @@
 {
-  "extends": "location-guard-configs/tsconfig.base.json"
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./packages/userscripts" },
+    { "path": "./packages/web" }
+  ],
+  "files": []
 }

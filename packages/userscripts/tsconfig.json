@@ -1,5 +1,7 @@
 {
-  "extends": "location-guard-configs/tsconfig.base.json",
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["dist", "test"]
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src",
+    "rollup.config.ts"
+  ]
 }

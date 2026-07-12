@@ -5,7 +5,8 @@
   "scripts": {
     "lint": "eslint --format=sukka .",
     "build": "turbo build",
-    "prerelease": "pnpm run lint && pnpm run build",
+    "typecheck": "tsc --build --noEmit",
+    "prerelease": "pnpm run lint && pnpm run typecheck && pnpm run build",
     "release": "bumpp -r --all --commit \"release: %s\" --tag \"%s\""
   },
   "devDependencies": {
@@ -14,7 +15,6 @@
     "eslint": "^10.7.0",
     "eslint-config-sukka": "^8.13.5",
     "eslint-formatter-sukka": "^8.13.5",
-    "location-guard-configs": "workspace:*",
     "turbo": "^2.10.4",
     "typescript": "^5.9.3"
   },

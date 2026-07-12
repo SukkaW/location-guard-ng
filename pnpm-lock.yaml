@@ -23,17 +23,12 @@ importers:
       eslint-formatter-sukka:
         specifier: ^8.13.5
         version: 8.13.5(eslint@10.7.0(jiti@2.6.1))
-      location-guard-configs:
-        specifier: workspace:*
-        version: link:packages/configs
       turbo:
         specifier: ^2.10.4
         version: 2.10.4
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-
-  packages/configs: {}
 
   packages/types: {}
 
