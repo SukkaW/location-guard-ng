@@ -34,34 +34,46 @@ export interface SiteOverride {
   includeSubdomain: boolean
 }
 
-/** The override stored for exactly this hostname, ignoring inherited parent entries */
-export async function getSiteOverride(hostname: string): Promise<SiteOverride | null> {
+/**
+ * The override stored for exactly this page, ignoring inherited parent
+ * entries. Exact overrides live at the full hostname; subdomain overrides
+ * live at `subdomainScope` (the registrable domain, e.g. "strava.com" while
+ * on www.strava.com).
+ */
+export async function getSiteOverride(hostname: string, subdomainScope: string = hostname): Promise<SiteOverride | null> {
   const trie = await getSiteLevelTrie();
   if (trie.has(hostname)) {
     return { level: trie.match(hostname)!, includeSubdomain: false };
   }
+  // full-hostname subdomain entry first (more specific; also covers entries
+  // saved while the scope probe fell back to the full hostname)
   if (trie.hasSubdomain(hostname)) {
     return { level: trie.match(hostname)!, includeSubdomain: true };
+  }
+  if (subdomainScope !== hostname && trie.hasSubdomain(subdomainScope)) {
+    return { level: trie.match(subdomainScope)!, includeSubdomain: true };
   }
   return null;
 }
 
-/** Set (or remove, with `level: null`) the override for a hostname */
-export async function setSiteLevel(hostname: string, level: Level | null, includeSubdomain: boolean): Promise<void> {
+/** Set (or remove, with `level: null`) the override for a page; subdomain overrides are stored at `subdomainScope` */
+export async function setSiteLevel(hostname: string, level: Level | null, includeSubdomain: boolean, subdomainScope: string = hostname): Promise<void> {
   if (!hostname) return;
 
   const trie = await getSiteLevelTrie();
   trie.remove(hostname);
   trie.removeSubdomain(hostname);
+  trie.removeSubdomain(subdomainScope);
 
   if (level !== null) {
     // Like upstream Location Guard, only store an override that changes the
     // effective level; picking what the site already resolves to (inherited
     // from a parent entry or the default level) keeps the trie minimal.
-    const inherited = (trie.match(hostname)) ?? await getStoredValueAsync('defaultLevel');
+    const targetKey = includeSubdomain ? subdomainScope : hostname;
+    const inherited = (trie.match(targetKey)) ?? await getStoredValueAsync('defaultLevel');
     if (level !== inherited) {
       if (includeSubdomain) {
-        trie.addSubdomain(hostname, level);
+        trie.addSubdomain(subdomainScope, level);
       } else {
         trie.add(hostname, level);
       }

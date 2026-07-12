@@ -83,5 +83,5 @@ export interface $LocationGuard {
   getValue<K extends keyof StoredValues>(key: K): Promise<StoredValues[K]>,
   resetConfig: () => Promise<void>,
   dumpSiteLevels: () => Promise<SiteLevelEntry[]>,
-  setSiteLevel: (hostname: string, level: Level | null, includeSubdomain: boolean) => Promise<void>
+  setSiteLevel: (hostname: string, level: Level | null, includeSubdomain: boolean, subdomainScope?: string) => Promise<void>
 }

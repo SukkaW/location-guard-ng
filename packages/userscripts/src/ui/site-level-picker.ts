@@ -1,6 +1,7 @@
 import type { Level } from 'location-guard-types';
 import { getEffectiveLevel, getSiteOverride, setSiteLevel } from '../site-levels';
 import { getStoredValueAsync } from '../storage';
+import { getRegistrableDomain } from '../registrable-domain';
 import { tagged as css } from 'foxts/tagged';
 
 function formatRadius(meters: number): string {
@@ -11,10 +12,14 @@ export async function openSiteLevelPicker(onSaved?: () => void): Promise<void> {
   const { hostname } = window.location;
   if (!hostname) return;
 
+  // "include all subdomains" scopes to the registrable domain (strava.com on
+  // www.strava.com), which is what users mean by "all subdomains"
+  const subdomainScope = getRegistrableDomain();
+
   const [defaultLevel, effectiveLevel, override, levels] = await Promise.all([
     getStoredValueAsync('defaultLevel'),
     getEffectiveLevel(hostname),
-    getSiteOverride(hostname),
+    getSiteOverride(hostname, subdomainScope),
     getStoredValueAsync('levels')
   ]);
 
@@ -75,7 +80,7 @@ export async function openSiteLevelPicker(onSaved?: () => void): Promise<void> {
   scopeHint.className = 'scope-hint';
   const updateScopeHint = () => {
     scopeHint.textContent = subdomainCheckbox.checked
-      ? `applies to *.${hostname} + ${hostname}`
+      ? `applies to *.${subdomainScope} + ${subdomainScope}`
       : `applies to ${hostname} exact only`;
   };
   updateScopeHint();
@@ -100,7 +105,7 @@ export async function openSiteLevelPicker(onSaved?: () => void): Promise<void> {
     if (dialog.returnValue === 'save') {
       const checked = form.querySelector('input[name="level"]:checked');
       const level = checked?.value ?? '';
-      void setSiteLevel(hostname, level === '' ? null : level as Level, subdomainCheckbox.checked)
+      void setSiteLevel(hostname, level === '' ? null : level as Level, subdomainCheckbox.checked, subdomainScope)
         .then(() => onSaved?.());
     }
     host.remove();
