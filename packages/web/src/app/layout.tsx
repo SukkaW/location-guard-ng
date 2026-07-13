@@ -1,5 +1,4 @@
 import '@radix-ui/themes/styles.css';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import './globals.css';
 import './custom-theme.css';
 

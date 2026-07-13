@@ -5,7 +5,8 @@ export const SITE_LEVELS_KEY = 'location-guard-site-levels';
 export const BRIDGE_KEY = 'location-guard-bridge';
 export const REAL_POSITION_KEY = 'location-guard-real-position';
 
-export function storedValueKey<K extends keyof StoredValues>(key: K) {
+export function storedValueKey<K extends keyof StoredValues>(key: K | null) {
+  if (key === null) return null;
   return [STORED_VALUE_KEY_PREFIX, key] as const;
 }
 

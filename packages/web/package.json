@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/themes": "^3.3.0",
-    "@vis.gl/react-maplibre": "^8.1.1",
+    "babel-plugin-react-compiler": "^1.0.0",
     "foxact": "^0.3.8",
     "foxmd": "^0.3.2",
     "foxts": "^5.8.0",
@@ -21,6 +21,7 @@
     "next-themes": "^0.4.6",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-map-gl": "^8.1.1",
     "swr": "^2.4.2"
   },
   "devDependencies": {

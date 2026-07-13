@@ -2,6 +2,8 @@
 
 import { REAL_POSITION_KEY } from '@/lib/swr-keys';
 import useSWRImmutable from 'swr/immutable';
+import { preload } from 'swr';
+import type { SWRConfiguration } from 'swr';
 
 export interface RealPosition {
   latitude: number,
@@ -34,6 +36,10 @@ function fetchRealPosition(): Promise<RealPosition> {
  * Gated by `enabled` so switching to that tab, not loading the page, triggers the
  * browser's permission prompt.
  */
-export function useRealPosition(enabled: boolean) {
-  return useSWRImmutable(enabled ? REAL_POSITION_KEY : null, fetchRealPosition);
+export function useRealPosition(enabled: boolean, options?: SWRConfiguration<RealPosition>) {
+  return useSWRImmutable(enabled ? REAL_POSITION_KEY : null, fetchRealPosition, options);
+}
+
+export function preloadRealPosition() {
+  return preload(REAL_POSITION_KEY, fetchRealPosition);
 }

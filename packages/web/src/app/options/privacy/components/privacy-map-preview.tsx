@@ -1,12 +1,13 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
-import { Map as MapGL, Marker, Source, Layer, NavigationControl, AttributionControl } from '@vis.gl/react-maplibre';
-import type { MapLayerMouseEvent, MarkerDragEvent, ViewStateChangeEvent } from '@vis.gl/react-maplibre';
+import { useMemo } from 'react';
+import { Map as MapGL, Marker, Source, Layer, NavigationControl, AttributionControl } from 'react-map-gl/maplibre';
+import type { MapLayerMouseEvent, MarkerDragEvent } from 'react-map-gl/maplibre';
 import type { StyleSpecification } from 'maplibre-gl';
-import { MapPinIcon } from 'lucide-react';
-import { useComponentWillReceiveUpdate } from 'foxact/use-component-will-receive-update';
 import styles from './privacy-map-preview.module.css';
+import { Flex, Box } from '@radix-ui/themes';
+
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 // No vector-tile host/API key on hand, so this is a plain raster style pointing at OSM —
 // the same tile source the old Leaflet version used.
@@ -24,8 +25,11 @@ const OSM_RASTER_STYLE: StyleSpecification = {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
     }
   },
+  // No maxzoom here: the layer's maxzoom is an *exclusive* cutoff (hidden at zoom >= maxzoom),
+  // which would blank the layer out right at the Map's own maxZoom={19}. The source's
+  // maxzoom above already stops tile fetching / over-zooms the last tile past z19.
   layers: [
-    { id: 'osm-tiles', type: 'raster', source: 'osm', minzoom: 0, maxzoom: 19 }
+    { id: 'osm-tiles', type: 'raster', source: 'osm', minzoom: 0 }
   ]
 };
 
@@ -52,36 +56,23 @@ export interface LatLng {
 
 interface PrivacyMapPreviewProps {
   center: LatLng,
+  /** Zoom for the very first paint only — the map owns its own zoom/pan after that (see PrivacyLevelTabs, which repositions it imperatively via useMap()). */
+  initialZoom?: number,
   /** Real-world radius in meters — projected onto the map as an actual geographic circle. */
+  realAccuracyRadius?: number,
   accuracyRadius?: number,
   protectionRadius?: number,
   editable?: boolean,
   onPositionChange?: (pos: LatLng) => void,
   height?: number,
-  /** Opaque key (e.g. the active tab) this preview remembers its zoom level under. */
-  zoomKey: string,
-  /** Zoom to use the first time `zoomKey` is seen — ignored once the user has zoomed on it. */
-  initialZoom?: number
+  shouldRenderPin?: boolean
 }
 
-export function PrivacyMapPreview({ center, accuracyRadius, protectionRadius, editable = false, onPositionChange, height = 460, zoomKey, initialZoom = 13 }: PrivacyMapPreviewProps) {
-  // Per-`zoomKey` remembered zoom, updated on every zoom end (user gesture or programmatic).
-  const zoomByKeyRef = useRef(new Map<string, number>());
-  const [longitude, setLongitude] = useState(center.longitude);
-  const [latitude, setLatitude] = useState(center.latitude);
-  const [zoom, setZoom] = useState(initialZoom);
-
-  // Re-center (fixedPos/real position resolving async) and restore this tab's remembered
-  // zoom (or `initialZoom` on first visit) whenever the coordinate or the active tab changes.
-  // Safe to always re-apply the remembered zoom here, even when only the coordinate moved:
-  // `zoomByKeyRef` is kept live by `onZoomEnd` below, so it already equals the current zoom
-  // unless the tab actually just changed.
-  useComponentWillReceiveUpdate(() => {
-    setLongitude(center.longitude);
-    setLatitude(center.latitude);
-    setZoom(zoomByKeyRef.current.get(zoomKey) ?? initialZoom);
-  }, [center.latitude, center.longitude, zoomKey]);
-
+export function PrivacyMapPreview({ center, initialZoom = 13, realAccuracyRadius, accuracyRadius, protectionRadius, editable = false, onPositionChange, height = 460, shouldRenderPin = true }: PrivacyMapPreviewProps) {
+  const realAccuracyCircle = useMemo(
+    () => (realAccuracyRadius === undefined ? null : circlePolygon(center.longitude, center.latitude, realAccuracyRadius)),
+    [center.latitude, center.longitude, realAccuracyRadius]
+  );
   const accuracyCircle = useMemo(
     () => (accuracyRadius === undefined ? null : circlePolygon(center.longitude, center.latitude, accuracyRadius)),
     [center.latitude, center.longitude, accuracyRadius]
@@ -90,24 +81,17 @@ export function PrivacyMapPreview({ center, accuracyRadius, protectionRadius, ed
     () => (protectionRadius === undefined ? null : circlePolygon(center.longitude, center.latitude, protectionRadius)),
     [center.latitude, center.longitude, protectionRadius]
   );
-  const showLegend = accuracyRadius !== undefined || protectionRadius !== undefined;
+  const showLegend = realAccuracyRadius !== undefined || accuracyRadius !== undefined || protectionRadius !== undefined;
 
   return (
     <div className={styles.mapWrapper}>
       <div className={styles.mapContainer} style={{ height }}>
         <MapGL
-          longitude={longitude}
-          latitude={latitude}
-          zoom={zoom}
+          id="privacy_map"
+          initialViewState={{ longitude: center.longitude, latitude: center.latitude, zoom: initialZoom }}
           style={{ width: '100%', height: '100%' }}
           mapStyle={OSM_RASTER_STYLE}
           attributionControl={false}
-          onMove={(event: ViewStateChangeEvent) => {
-            setLongitude(event.viewState.longitude);
-            setLatitude(event.viewState.latitude);
-            setZoom(event.viewState.zoom);
-          }}
-          onZoomEnd={(event: ViewStateChangeEvent) => zoomByKeyRef.current.set(zoomKey, event.viewState.zoom)}
           onClick={
             editable
               ? (event: MapLayerMouseEvent) => {
@@ -119,52 +103,57 @@ export function PrivacyMapPreview({ center, accuracyRadius, protectionRadius, ed
           <NavigationControl position="top-left" showCompass={false} />
           <AttributionControl position="bottom-right" compact />
 
-          {accuracyCircle && (
-            <Source id="accuracy-circle" type="geojson" data={accuracyCircle}>
-              <Layer id="accuracy-circle-fill" type="fill" paint={{ 'fill-color': '#0090ff', 'fill-opacity': 0.28 }} />
-              <Layer id="accuracy-circle-line" type="line" paint={{ 'line-color': '#0090ff', 'line-width': 2, 'line-opacity': 0.9 }} />
-            </Source>
-          )}
           {protectionCircle && (
             <Source id="protection-circle" type="geojson" data={protectionCircle}>
               <Layer id="protection-circle-fill" type="fill" paint={{ 'fill-color': '#e5484d', 'fill-opacity': 0.38 }} />
               <Layer id="protection-circle-line" type="line" paint={{ 'line-color': '#e5484d', 'line-width': 2, 'line-opacity': 0.9 }} />
             </Source>
           )}
+          {accuracyCircle && (
+            <Source id="accuracy-circle" type="geojson" data={accuracyCircle}>
+              <Layer id="accuracy-circle-fill" type="fill" paint={{ 'fill-color': '#0090ff', 'fill-opacity': 0.28 }} />
+              <Layer id="accuracy-circle-line" type="line" paint={{ 'line-color': '#0090ff', 'line-width': 2, 'line-opacity': 0.9 }} />
+            </Source>
+          )}
+          {realAccuracyCircle && (
+            <Source id="real-accuracy-circle" type="geojson" data={realAccuracyCircle}>
+              <Layer id="real-accuracy-circle-fill" type="fill" paint={{ 'fill-color': '#30a46c', 'fill-opacity': 0.28 }} />
+              <Layer id="real-accuracy-circle-line" type="line" paint={{ 'line-color': '#30a46c', 'line-width': 2, 'line-opacity': 0.9 }} />
+            </Source>
+          )}
 
           <Marker
+            style={{ display: shouldRenderPin ? 'block' : 'none' }}
             longitude={center.longitude}
             latitude={center.latitude}
             draggable={editable}
             onDragEnd={(event: MarkerDragEvent) => {
               onPositionChange?.({ latitude: event.lngLat.lat, longitude: event.lngLat.lng });
             }}
-          >
-            <MapPinIcon
-              size={28}
-              color="var(--accent-9)"
-              fill="var(--accent-9)"
-              strokeWidth={1.5}
-              style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35))' }}
-            />
-          </Marker>
+          />
         </MapGL>
       </div>
       {showLegend && (
-        <div className={styles.legend}>
+        <Flex className={styles.legend} direction="column" gap="1">
+          {realAccuracyRadius !== undefined && (
+            <Box className={styles.legendItem}>
+              <span className={styles.legendDot} style={{ backgroundColor: '#30a46c' }} />
+              {' '}Real Device Location Accuracy
+            </Box>
+          )}
           {protectionRadius !== undefined && (
-            <span className={styles.legendItem}>
+            <Box className={styles.legendItem}>
               <span className={styles.legendDot} style={{ backgroundColor: '#e5484d' }} />
-              {' '}Device Report Accuracy Area
-            </span>
+              {' '}Illustrative Reported Accuracy
+            </Box>
           )}
           {accuracyRadius !== undefined && (
-            <span className={styles.legendItem}>
+            <Box className={styles.legendItem}>
               <span className={styles.legendDot} style={{ backgroundColor: '#0090ff' }} />
-              {' '}Script Protection Area
-            </span>
+              {' '}Script Noise Possible Displacement
+            </Box>
           )}
-        </div>
+        </Flex>
       )}
     </div>
   );

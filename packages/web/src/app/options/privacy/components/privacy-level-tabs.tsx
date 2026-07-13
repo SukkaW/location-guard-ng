@@ -1,16 +1,20 @@
 'use client';
 
 import type React from 'react';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { NoisyLevel, StoredValues } from 'location-guard-types';
 import { Flex, Skeleton, Tabs, Text } from '@radix-ui/themes';
+import { MapProvider, useMap } from 'react-map-gl/maplibre';
+
 import { NOISY_LEVEL_RANGE } from '@/lib/level-labels';
 import { useStoredValue, useSetStoredValue } from '@/lib/use-stored-value';
 import { NoisyLevelControls } from './noisy-level-controls';
 import type { LatLng } from './privacy-map-preview';
 import { PrivacyMapPreview } from './privacy-map-preview';
-import { useRealPosition } from './use-real-position';
+import { preloadRealPosition, useRealPosition } from './use-real-position';
 import { clamp } from 'foxts/clamp';
+import { useSingleton } from 'foxact/use-singleton';
+import { waitFor } from 'foxts/wait-for';
 
 const MONO_FONT = 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace';
 
@@ -38,14 +42,22 @@ function getMapVisualization(levelTab: LevelTab, levels: Levels | undefined, rea
     return {};
   }
   if (levelTab === 'real') {
-    // No noise applied: the halo is the device's own genuine reported accuracy, not an estimate.
-    return realAccuracy === undefined ? {} : { protectionRadius: realAccuracy };
+    // No noise applied: the halo is the device's own genuine reported accuracy, not an
+    // estimate — same circle (green, "Real Location Accuracy Area") as on the noisy tabs.
+    return realAccuracy === undefined ? {} : { realAccuracyRadius: realAccuracy };
   }
+  // Low/Medium/High: show the real device accuracy alongside the two noise-derived
+  // circles, so it's clear how the noise range compares to the actual GPS reading.
+  const realAccuracyRadius = realAccuracy === undefined ? {} : { realAccuracyRadius: realAccuracy };
   if (!levels) {
-    return {};
+    return realAccuracyRadius;
   }
   const { radius } = levels[levelTab];
-  return { accuracyRadius: radius, protectionRadius: radius * 0.42 };
+  return { ...realAccuracyRadius, accuracyRadius: radius, protectionRadius: radius * 0.42 };
+}
+
+function getMapCenter(levelTab: LevelTab, fixedPos: LatLng | undefined, realPos: LatLng | undefined) {
+  return (levelTab !== 'fixed' && realPos) ? realPos : (fixedPos ?? DEFAULT_FIXED_POS);
 }
 
 // Web Mercator meters-per-pixel at zoom 0, latitude 0 (Leaflet's default CRS, 256px tiles).
@@ -55,9 +67,9 @@ const WORLD_METERS_PER_PIXEL_AT_EQUATOR = 156543.03392;
 // read as an extreme close-up.
 const DESIRED_CIRCLE_PIXEL_RADIUS = 72;
 
-const PRECISE_ZOOM = 17;
+const PRECISE_ZOOM = 18;
 const MIN_ZOOM = 3;
-const MAX_ZOOM = 17;
+const MAX_ZOOM = 19;
 
 /** Zoom level at which a circle of `radiusMeters` (at `latitude`) renders at `DESIRED_CIRCLE_PIXEL_RADIUS`. */
 function zoomForRadius(radiusMeters: number, latitude: number): number {
@@ -82,37 +94,112 @@ interface PrivacyLevelTabsProps {
   pageHeader: React.ReactNode
 }
 
-export function PrivacyLevelTabs({ fixedInfo, realInfo, noisyInfo, pageHeader }: PrivacyLevelTabsProps) {
+export function PrivacyLevelTabs(props: PrivacyLevelTabsProps) {
+  return (
+    <MapProvider>
+      <PrivacyLevelTabsInner {...props} />
+    </MapProvider>
+  );
+}
+
+preloadRealPosition();
+
+function PrivacyLevelTabsInner({ fixedInfo, realInfo, noisyInfo, pageHeader }: PrivacyLevelTabsProps) {
   const [levelTab, setLevelTab] = useState<LevelTab>('low');
+
+  const mapRef = useMap();
 
   const { data: levels, isLoading: levelsLoading, error: levelsError } = useStoredValue('levels');
   const { trigger: setLevels, isMutating: levelsMutating } = useSetStoredValue('levels');
-  const { data: fixedPos, isLoading: fixedPosLoading } = useStoredValue('fixedPos');
   const { trigger: setFixedPos } = useSetStoredValue('fixedPos');
+
+  // These two `onSuccess` hooks are the *only* place fixedPos/realPos ever move the
+  // camera outside of a tab switch (handled explicitly in handleTabChange below) — no
+  // need to reactively watch a derived `mapCenter` for changes, since we already know
+  // exactly which two events can move it. `onSuccess` fires only for this hook's own
+  // fetch/revalidation, never for a sibling mutation's `populateCache` (e.g. dragging
+  // the marker), so this can't fight the user's own edits — see useStoredValue's docs.
+  const lastFixedPosCenterRef = useRef<LatLng | null>(null);
+  // to avoid race condition, we wait for map to mount after we load stored value
+  const { data: fixedPos, isLoading: fixedPosLoading } = useStoredValue(
+    mapRef.privacy_map ? 'fixedPos' : null,
+    {
+      async onSuccess(pos) {
+        if (levelTab !== 'fixed') return;
+
+        const map = await waitFor(() => mapRef.privacy_map, 20);
+
+        if (lastFixedPosCenterRef.current?.latitude === pos.latitude && lastFixedPosCenterRef.current.longitude === pos.longitude) return;
+        // This is effectively the map's first real paint for this tab (until now it's
+        // been sitting at initialViewState's fallback), so apply the correct zoom for
+        // `pos`'s latitude too, not just its center.
+        // 'fixed' ignores the realAccuracy param entirely, so there's no need to (and,
+        // being declared below, no way to cleanly) reference `realPos` here.
+        map.jumpTo({ center: [pos.longitude, pos.latitude], zoom: getInitialZoom('fixed', levels, undefined, pos.latitude) });
+        lastFixedPosCenterRef.current = pos;
+      }
+    }
+  );
 
   // Real position is needed for every tab except "Fixed" (which is a user-chosen point,
   // not derived from the device's actual location) — Low/Medium/High noise is added on
   // top of the real position, so their preview should center on it too, not on fixedPos.
-  const { data: realPos, error: realPosError, isLoading: realPosLoading } = useRealPosition(levelTab !== 'fixed');
+  const lastRealPosCenterRef = useRef<LatLng | null>(null);
+  // to avoid race condition, we wait for map to mount after we load stored value
+  // but we still preload the real position on page load, so we can render as soon as map mounts
+  const { data: realPos, error: realPosError, isLoading: realPosLoading } = useRealPosition(
+    !!mapRef.privacy_map,
+    {
+      async onSuccess(pos) {
+        if (levelTab === 'fixed') return;
+
+        const map = await waitFor(() => mapRef.privacy_map, 20);
+
+        if (lastRealPosCenterRef.current?.latitude === pos.latitude && lastRealPosCenterRef.current.longitude === pos.longitude) return;
+        // Same as fixedPos's onSuccess above — this is the first time we know the real
+        // center, so recompute zoom for `pos`'s latitude/accuracy instead of leaving
+        // whatever initialViewState guessed from the fallback center.
+        map.jumpTo({ center: [pos.longitude, pos.latitude], zoom: getInitialZoom(levelTab, levels, pos.accuracy, pos.latitude) });
+        lastRealPosCenterRef.current = pos;
+      }
+    }
+  );
 
   const commitLevel = (level: NoisyLevel, patch: Partial<{ radius: number, cacheTime: number }>) => {
     if (!levels) return;
-    void setLevels({ ...levels, [level]: { ...levels[level], ...patch } });
+    setLevels({ ...levels, [level]: { ...levels[level], ...patch } });
   };
 
   const mapVisualization = getMapVisualization(levelTab, levels, realPos?.accuracy);
   const controlsDisabled = levelsMutating || !!levelsError;
-  const mapCenter = levelTab !== 'fixed' && realPos ? realPos : (fixedPos ?? DEFAULT_FIXED_POS);
+  const mapCenter = getMapCenter(levelTab, fixedPos, realPos);
   const initialZoom = getInitialZoom(levelTab, levels, realPos?.accuracy, mapCenter.latitude);
+
+  // The map is uncontrolled (see PrivacyMapPreview) — instead of feeding it center/zoom as
+  // props every render, we drive its camera imperatively via the shared `useMap()` handle,
+  // only at the moments that actually warrant moving it: a tab switch (here) or fixedPos/
+  // realPos resolving asynchronously (the two `onSuccess` hooks above).
+  const zoomByTabRef = useSingleton(() => new Map<LevelTab, number>());
+
+  const handleTabChange = useCallback((nextTab: LevelTab) => {
+    if (mapRef.privacy_map) {
+      // Remember the tab we're leaving at whatever zoom the user left it at.
+      zoomByTabRef.current.set(levelTab, mapRef.privacy_map.getZoom());
+
+      const nextCenter = getMapCenter(nextTab, fixedPos, realPos);
+      const nextZoom = zoomByTabRef.current.get(nextTab) ?? getInitialZoom(nextTab, levels, realPos?.accuracy, nextCenter.latitude);
+
+      mapRef.privacy_map.flyTo({ center: [nextCenter.longitude, nextCenter.latitude], zoom: nextZoom });
+    }
+    setLevelTab(nextTab);
+  }, [fixedPos, levelTab, levels, mapRef.privacy_map, realPos, zoomByTabRef]);
 
   return (
     <Flex direction="column" gap="5">
       {pageHeader}
       <Tabs.Root
         value={levelTab}
-        onValueChange={(value) => {
-          setLevelTab(value as LevelTab);
-        }}
+        onValueChange={(value) => handleTabChange(value as LevelTab)}
       >
         <Tabs.List>
           <Tabs.Trigger value="low">Low noise</Tabs.Trigger>
@@ -150,8 +237,8 @@ export function PrivacyLevelTabs({ fixedInfo, realInfo, noisyInfo, pageHeader }:
         center={mapCenter}
         editable={levelTab === 'fixed'}
         onPositionChange={levelTab === 'fixed' ? (pos) => { void setFixedPos(pos); } : undefined}
-        zoomKey={levelTab}
         initialZoom={initialZoom}
+        shouldRenderPin={levelTab === 'fixed'}
         {...mapVisualization}
       />
 
