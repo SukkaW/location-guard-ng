@@ -17,6 +17,10 @@ const OSM_RASTER_STYLE: StyleSpecification = {
       type: 'raster',
       tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       tileSize: 256,
+      // OSM's tile server only has tiles up to z19 and 400s on anything past that — this
+      // (not the layer's maxzoom below, which only clamps paint visibility, not fetching)
+      // is what tells MapLibre to stop requesting deeper tiles and over-zoom the z19 one.
+      maxzoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
     }
   },
