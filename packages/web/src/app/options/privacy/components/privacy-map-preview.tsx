@@ -3,35 +3,12 @@
 import { useMemo } from 'react';
 import { Map as MapGL, Marker, Source, Layer, NavigationControl, AttributionControl } from 'react-map-gl/maplibre';
 import type { MapLayerMouseEvent, MarkerDragEvent } from 'react-map-gl/maplibre';
-import type { StyleSpecification } from 'maplibre-gl';
 import styles from './privacy-map-preview.module.css';
 import { Flex, Box } from '@radix-ui/themes';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-// No vector-tile host/API key on hand, so this is a plain raster style pointing at OSM —
-// the same tile source the old Leaflet version used.
-const OSM_RASTER_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    osm: {
-      type: 'raster',
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      // OSM's tile server only has tiles up to z19 and 400s on anything past that — this
-      // (not the layer's maxzoom below, which only clamps paint visibility, not fetching)
-      // is what tells MapLibre to stop requesting deeper tiles and over-zoom the z19 one.
-      maxzoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-    }
-  },
-  // No maxzoom here: the layer's maxzoom is an *exclusive* cutoff (hidden at zoom >= maxzoom),
-  // which would blank the layer out right at the Map's own maxZoom={19}. The source's
-  // maxzoom above already stops tile fetching / over-zooms the last tile past z19.
-  layers: [
-    { id: 'osm-tiles', type: 'raster', source: 'osm', minzoom: 0 }
-  ]
-};
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
 /** A GeoJSON polygon approximating a circle of `radiusMeters` around a point (equirectangular — plenty accurate at the few-km radii used here). */
 function circlePolygon(longitude: number, latitude: number, radiusMeters: number, steps = 64) {
@@ -90,7 +67,7 @@ export function PrivacyMapPreview({ center, initialZoom = 13, realAccuracyRadius
           id="privacy_map"
           initialViewState={{ longitude: center.longitude, latitude: center.latitude, zoom: initialZoom }}
           style={{ width: '100%', height: '100%' }}
-          mapStyle={OSM_RASTER_STYLE}
+          mapStyle={MAP_STYLE}
           attributionControl={false}
           onClick={
             editable
