@@ -1,7 +1,8 @@
 // @ts-expect-error -- intentional usage for React Fast Refresh support
 
-// eslint-disable-next-line import-x/no-webpack-loader-syntax -- Intentional for fast refresh markdown
-import CONTENT from '!!raw-loader!../../../../README.md';
+// eslint-disable-next-line import-x/no-relative-packages -- doesn't work
+import CONTENT from '../../../../README.md' with { turbopackLoader: 'raw-loader', turbopackAs: '*.js' };
+
 import { cache } from 'react';
 import { foxmd } from 'foxmd';
 import type { FoxmdRendererOptions } from 'foxmd';
