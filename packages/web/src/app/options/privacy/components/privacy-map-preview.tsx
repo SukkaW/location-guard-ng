@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Map as MapGL, Marker, Source, Layer, NavigationControl, AttributionControl } from 'react-map-gl/maplibre';
+import { Map as MapGL, Marker, Source, Layer, NavigationControl, AttributionControl, useMap } from 'react-map-gl/maplibre';
 import type { MapLayerMouseEvent, MarkerDragEvent } from 'react-map-gl/maplibre';
+import { LocateFixedIcon } from 'lucide-react';
 import styles from './privacy-map-preview.module.css';
 import { Flex, Box } from '@radix-ui/themes';
 
@@ -45,6 +46,20 @@ interface PrivacyMapPreviewProps {
   shouldRenderPin?: boolean
 }
 
+function RecenterButton({ center }: { center: LatLng }) {
+  const mapRef = useMap();
+  return (
+    <button
+      type="button"
+      className={styles.recenterButton}
+      aria-label="Re-center map"
+      onClick={() => mapRef.privacy_map?.flyTo({ center: [center.longitude, center.latitude] })}
+    >
+      <LocateFixedIcon size={15} />
+    </button>
+  );
+}
+
 export function PrivacyMapPreview({ center, initialZoom = 13, realAccuracyRadius, accuracyRadius, protectionRadius, editable = false, onPositionChange, height = 460, shouldRenderPin = true }: PrivacyMapPreviewProps) {
   const realAccuracyCircle = useMemo(
     () => (realAccuracyRadius === undefined ? null : circlePolygon(center.longitude, center.latitude, realAccuracyRadius)),
@@ -78,6 +93,7 @@ export function PrivacyMapPreview({ center, initialZoom = 13, realAccuracyRadius
           }
         >
           <NavigationControl position="top-left" showCompass={false} />
+          <RecenterButton center={center} />
           <AttributionControl position="bottom-right" compact />
 
           {protectionCircle && (
