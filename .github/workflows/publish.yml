@@ -23,12 +23,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-      - name: Setup node
-        uses: actions/setup-node@v6
+        with:
+          run_install: false
+          cache: true
+      - uses: actions/setup-node@v6
         with:
           node-version-file: ".node-version"
           check-latest: true
-          cache: "pnpm"
+          package-manager-cache: false
           registry-url: "https://registry.npmjs.org"
       - run: pnpm config set --location=global minimumReleaseAge 0
       - run: pnpm install

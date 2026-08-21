@@ -28,19 +28,19 @@
   "dependencies": {
     "@swc/helpers": "^0.5.23",
     "foxact": "^0.3.8",
-    "foxts": "^5.8.0",
-    "hntrie": "^1.0.1"
+    "foxts": "^5.9.1",
+    "hntrie": "^1.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-replace": "^6.0.3",
-    "@swc/core": "^1.15.43",
+    "@swc/core": "^1.16.1",
     "@types/greasemonkey": "^4.0.7",
     "@types/greasemonkey3": "npm:@types/greasemonkey@^3.0.3",
     "@types/node": "^22.20.1",
     "location-guard-types": "workspace:*",
-    "rollup": "^4.62.2",
+    "rollup": "^4.62.5",
     "rollup-plugin-swc3": "^0.12.1",
     "rollup-plugin-userscript-metablock": "^0.4.3",
     "typed-query-selector": "^2.12.2"

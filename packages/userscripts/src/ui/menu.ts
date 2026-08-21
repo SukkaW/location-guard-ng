@@ -63,7 +63,9 @@ export function registerDebugMenuCommand(): void {
 export function refreshMenusOnRemoteChange(): void {
   if (typeof gm.addValueChangeListener !== 'function') return;
 
-  for (const key of ['siteLevels', 'defaultLevel']) {
+  const menuKeys = ['siteLevels', 'debug'];
+  for (let i = 0, len = menuKeys.length; i < len; i++) {
+    const key = menuKeys[i];
     gm.addValueChangeListener(key, (_name, _oldValue, _newValue, remote) => {
       // local changes are already handled by the picker's onSaved callback
       if (remote) {

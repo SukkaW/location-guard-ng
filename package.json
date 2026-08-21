@@ -10,13 +10,13 @@
     "release": "bumpp --install -r --all --commit \"release: %s\" --tag \"%s\""
   },
   "devDependencies": {
-    "@eslint-sukka/react": "^8.13.5",
+    "@eslint-sukka/react": "^9.0.1",
     "bumpp": "^10.4.1",
-    "eslint": "^10.7.0",
-    "eslint-config-sukka": "^8.13.5",
-    "eslint-formatter-sukka": "^8.13.5",
-    "turbo": "^2.10.4",
+    "eslint": "^10.8.1",
+    "eslint-config-sukka": "^9.0.1",
+    "eslint-formatter-sukka": "^9.0.1",
+    "turbo": "^2.10.11",
     "typescript": "^6.0.3"
   },
-  "packageManager": "pnpm@11.10.0"
+  "packageManager": "pnpm@11.22.0"
 }

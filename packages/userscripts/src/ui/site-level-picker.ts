@@ -59,7 +59,8 @@ export async function openSiteLevelPicker(onSaved?: () => void): Promise<void> {
     ['low', `Low (±${formatRadius(levels.low.radius)} noise)`],
     ['real', 'Use real location']
   ];
-  for (const [value, text] of levelOptions) {
+  for (let i = 0, len = levelOptions.length; i < len; i++) {
+    const [value, text] = levelOptions[i];
     const label = document.createElement('label');
     const radio = document.createElement('input');
     radio.type = 'radio';
